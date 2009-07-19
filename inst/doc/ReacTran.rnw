@@ -1,0 +1,992 @@
+\documentclass[article,nojss]{jss}
+\DeclareGraphicsExtensions{.pdf,.eps}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add-on packages and fonts
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+
+\newcommand{\noun}[1]{\textsc{#1}}
+%% Bold symbol macro for standard LaTeX users
+\providecommand{\boldsymbol}[1]{\mbox{\boldmath $#1$}}
+
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\newcommand{\rt}{\textbf{\textsf{ReacTran }}}
+\newcommand{\ds}{\textbf{\textsf{deSolve }}}
+\newcommand{\rs}{\textbf{\textsf{rootSolve }}}
+\newcommand{\R}{\proglang{R }}
+\title{
+  \proglang{R}-package \rt: Reactive Transport Modelling in \R
+}
+\Plaintitle{Reactive transport modelling in R}
+
+\Keywords{
+  reactive-transport, diffusion, advection, reaction, porous media, rivers,
+  estuary, water column, \proglang{R}
+}
+
+\Plainkeywords{
+  reactive-transport, diffusion, advection, reaction, porous media, rivers,
+  estuary, water column, R
+}
+
+
+\author{Karline Soetaert\\
+NIOO-CEME\\
+The Netherlands
+\And
+Filip Meysman\\
+NIOO-CEME\\
+The Netherlands
+}
+
+\Plainauthor{Karline Soetaert, and Filip Meysman}
+
+\Abstract{
+  \R package \rt \citep{ReacTran} contains functions for creating reactive-
+  transport models in \R.
+}
+
+%% The address of (at least) one author should be given
+%% in the following format:
+\Address{
+  Karline Soetaert\\
+  Centre for Estuarine and Marine Ecology (CEME)\\
+  Netherlands Institute of Ecology (NIOO)\\
+  4401 NT Yerseke, Netherlands\\
+  E-mail: \email{k.soetaert@nioo.knaw.nl}\\
+  URL: \url{http://www.nioo.knaw.nl/ppages/ksoetaert}\\
+  \\
+  Filip Meysman\\
+  Centre for Estuarine and Marine Ecology (CEME)\\
+  Netherlands Institute of Ecology (NIOO)\\
+  4401 NT Yerseke, Netherlands\\
+  E-mail: \email{f.meysman@nioo.knaw.nl}\\
+  URL: \url{http://www.nioo.knaw.nl/ppages/fmeysman}\\
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% R/Sweave specific LaTeX commands.
+%% need no \usepackage{Sweave}
+%\VignetteIndexEntry{R-package ReacTran: reactive transport modelling in R}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Begin of the document
+\begin{document}
+\SweaveOpts{engine=R,eps=FALSE}
+\SweaveOpts{keep.source=TRUE}
+
+<<preliminaries,echo=FALSE,results=hide>>=
+library("ReacTran")
+options(prompt = "> ")
+options(width=75)
+@
+
+\maketitle
+
+\section{General reaction transport equation in one dimension}
+
+  \subsection {The reaction-transport equation}
+  The general 1-D reaction-transport equation in multi-phase environments and
+  for shapes with variable geometry is:
+  
+  \[
+    \frac{\partial \xi C}{\partial t} = -\frac{1}{A}\cdot \frac{\partial
+       (A \cdot J)}{\partial x} + reac
+  \]
+  where
+  \begin{itemize}
+    \item t is time
+    \item x is space
+    \item C is concentration of a substance in its respective phase (units of
+      e.g. $M L^{-3} liquid$ for sediment solutes).
+      \footnote{here we use \emph{M} for mass, \emph{L} for
+        length and \emph{t} for time
+      }
+    \item $\xi$ is the volume fraction (-), i.e. the fraction of a phase in
+      the bulk volume (see figure).
+      In many cases, only one phase is considered and $\xi$ = 1;
+      For sediments, $\xi$ would be porosity (solutes), or
+      1-porosity (solids).
+    \item $A$ is the (total) surface area ($L^2$).
+    \item J are fluxes, (units of $M L^{-2} t^{-1}$)
+  \end {itemize}
+  
+  The Fluxes (J), which are estimated per unit of total surface, consist of a
+  dispersive and an advective component:
+  \[
+    J = -\xi D  \cdot \frac{\partial C}{\partial x} + \xi u  \cdot C
+  \]
+
+  where
+  \begin{itemize}
+    \item D is the diffusion (or dispersion) coefficient, units of $L^2 t^{-1}$
+    \item u is the advection velocity, units of $L t^{-1}$
+  \end {itemize}
+
+  \subsection{Boundary conditions in 1-D models}
+  The boundaries (at the extremes of the model domain, e.g. at x=0)
+  can be one of the following types:
+  \begin{itemize}
+    \item A concentration boundary, e.g. $C |_{x=0}=C_0$
+    \item A diffusive + advective flux boundary $J_{x=0}=J_0$
+    \item A boundary layer convective exchange flux boundary
+      $J_{x=0} = a_{bl}\cdot(C_{bl}-C_0)$
+  \end{itemize}
+
+  \subsection{Numerical approximation}
+  The reaction-transport formula consists of a partial differential equation
+  (PDE).
+  
+  To solve it, the spatial gradients are approximated using so-called
+  numerical differences (the method-of-lines, MOL, approach). This converts
+  the partial differential equations into ordinary differential equations
+  (ODE).
+  
+  This means that the model domain is divided into
+  a number of grid cells, and for each grid cell i, we write:
+  
+  \[
+    \frac{d \xi_i C_i}{d t} = -\frac{1}{A_i}\cdot \frac{\Delta_i
+       (A \cdot J)}{\Delta x_i} + reac_i
+  \]
+  where $\Delta_i$ denotes that the flux gradient is to be taken over
+  box i, and $\Delta x_i$ is the thickness of box i:
+  \[
+  \Delta_i (A \cdot J) =A_{i,i+1} \cdot J_{i,i+1}-A_{i-1,i} \cdot J_{i-1,i}
+  \]
+  where \code{i,i+1} denotes the interface between box i and i+1.
+  
+  The fluxes at the box interfaces are discretized as:
+  \[
+    J_{i-1,i} = -\xi_{i-1,i} D_{i-1,i}  \cdot \frac{C_{i}-C_{i-1}}{\Delta x_{i-1,i}} +
+                 \xi_{i-1,i}  u_{i-1,i} \cdot (\vartheta_{i-1,i} \cdot C_{i-1} +
+                 (1-\vartheta_{i-1,i}) \cdot C_{i})
+  \]
+  with  $\Delta x_{i-1,i}$ the distance between the centre of grid cells i-1
+  and i, and $\vartheta$ the upstream weighing coefficients for the
+  advective term.
+
+  \clearpage
+ \section{one-dimensional finite difference grids and properties in ReacTran}
+
+  \subsection{Generating a spatial discretization grid }
+
+  The 1-D spatial discretization grid can best be generated with \rt function
+  \code{setup.grid.1D}.
+
+\setkeys{Gin}{width=0.5\textwidth}
+\begin{figure}
+\begin{center}
+\includegraphics{reactran-phase}
+\end{center}
+\caption{An example of multiple phases in \rt, adapted from figure 3.9
+ from Soetaert and Herman, 2009}
+\label{fig:fig1}
+\end{figure}
+
+
+\setkeys{Gin}{width=0.5\textwidth}
+\begin{figure}
+\begin{center}
+\includegraphics{reactran-fig1}
+\end{center}
+\caption{Nomenclature for the spatial discretization grid in \code{grid.1D}}
+\label{fig:fig1}
+\end{figure}
+
+
+  Function \code{setup.grid.1D} creates a grid, which can comprise several
+  zones:
+  \begin{verbatim}
+  setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL, N=NULL,
+     dx.1 =NULL, p.dx.1 = rep(1,length(L)), max.dx.1 = L,
+     dx.N =NULL, p.dx.N = rep(1,length(L)), max.dx.N = L)
+  \end{verbatim}
+  with the following arguments:
+  \begin{itemize}
+    \item \code{x.up}. The position of the upstream boundary.
+    \item \code{x.down}. The positions of the downstream boundaries in
+      each zone.
+    \item \code{L, N}, the thickness and the number of grid cells in each zone.
+    \item \code{dx.1, p.dx.1, max.dx.1}, the size of the first grid cell,
+      the factor of increase near the upstream boundary,
+      and maximal grid cell size in the upstream half of each zone.
+    \item \code{dx.N, p.dx.N, max.dx.N}, the size of the last grid cell,
+      the factor of increase near the downstream boundary,
+      and maximal grid cell size in the downstream half of each zone.
+  \end{itemize}
+  It returns an element of class \code{grid.1D} that contains the following
+  elements (units L), see figure 2:
+  \begin{itemize}
+    \item \code{x.up, x.down}. The position of the upstream and downstream
+      boundary.
+    \item \code{x.int}, the position of the grid cell interfaces,
+      where the fluxes are specified, a vector of length N+1.
+    \item \code{x.mid}, the position of the grid cell centres, where the
+      concentrations are specified, a vector of length N.
+    \item \code{dx}, the thickness of boxes , i.e. the distance between the
+      grid cell interfaces, a vector of length N. This is equivalent to
+       $\Delta x_i$
+    \item \code{dx.aux}, the distance between the points where the
+      concentrations are specified, a vector of length N+1. This is equivalent
+      to  $\Delta x_{i-1,i}$ .
+  \end{itemize}
+
+  For example, to subdivide an estuary, 100 km long into 50 boxes, with the
+  first box of size 1 km, we write \footnote{note that by embracing the
+  statement within brackets, we execute it AND print the result to the screen}:
+<<>>=
+ (grid<-setup.grid.1D(L=100,dx.1=1,N=50))
+@
+which can be plotted as follows:
+<<label=Grid,include=FALSE>>=
+ plot(grid)
+@
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{figure}
+\begin{center}
+<<label=grid,fig=TRUE,echo=FALSE>>=
+<<Grid>>
+@
+\end{center}
+\caption{exponential grid size  - see text for \R-code}
+\label{fig:grid}
+\end{figure}
+
+  \subsection{Other grid properties}
+  In the 1-D discretization formula, some properties (e.g. concentrations)
+  are defined at the centre of boxes ($C_i$), while other properties
+  (transport coefficients) are prescribed at the box interfaces
+  ($\vartheta$, $\xi$, D).
+
+  These properties can be generated conform a previously defined grid
+  with \rt function \code{setup.prop.1D}. Its syntax is:
+  \begin{verbatim}
+  setup.prop.1D(func=NULL, value=NULL, xy=NULL,
+    interpolate="spline", grid, ...)
+  \end{verbatim}
+  They can be specified as a function, or as a (constant) value, or as
+  an (x,y) data series, which is interpolated using a spline or linearly.
+  
+  The function returns a list of class \code{prop.1D} that contains:
+  \begin{itemize}
+    \item \code{int}, the property value at the grid cell interfaces,
+      a vector of length N+1.
+    \item \code{mid}, the property value at the middle of grid cells,
+      a vector of length N.
+  \end{itemize}
+
+  A number of commonly used property functions are implemented in \rt:
+  \begin{itemize}
+    \item \code{p.exp} for an exponentially decreasing transition
+    \item \code{p.lin} for a linearly decreasing transition
+    \item \code{p.sig} for a sigmoidally decreasing transition
+  \end{itemize}
+
+  Below, we demonstrate the use of \code{setup.prop.1D} to create the
+  properties for use in a sediment biogeochemical model.
+
+  After defining a grid, we first use utility function \code{p.exp} to
+  calculate a bioturbation profile, assuming there is a constant bioturbation
+  in an upper layer (2 cm), declining exponentially below this layer.:
+<<>>=
+
+ grid <- setup.grid.1D(L=10,N=100)
+ Db   <- setup.prop.1D(func=p.exp,grid=grid,y.0=5,y.inf=0,x.L= 2)
+@
+
+  We then define a function (\code{exp.inc}) that specifies an
+  exponentially increasing profile to calculate the volume fraction
+  of solid substances in the sediment. These are represented by 1-porosity,
+  where the porosity is an exponentially decreasing function, which can
+  be calculated using \code{p.exp}.
+
+<<>>=
+ exp.inc <- function(x,y.0=1,y.inf=0.5,x.L=0,x.att=1)
+       return(1-p.exp(x,y.0,y.inf,x.L,x.att))
+
+ VFsolid <- setup.prop.1D(func=exp.inc,grid=grid,y.0=0.9,y.inf=0.7)
+
+@
+
+  A \code{plot} method is defined for class \code{prop.1D}; to invoke it
+  one has to pass both the property as the grid on which it is based;
+  \code{xyswap=TRUE} swaps the x- and y-axis, which is useful
+  for plotting vertical profiles.
+<<label=prop,include=FALSE>>=
+  par(mfrow=c(1,2))
+  plot(VFsolid,grid,xyswap=TRUE,type="l",main="1-porosity")
+  plot(Db,grid,xyswap=TRUE,type="l",main="Db")
+  par(mfrow=c(1,1))
+@
+
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{figure}
+\begin{center}
+<<label=prop,fig=TRUE,echo=FALSE>>=
+<<prop>>
+@
+\end{center}
+\caption{Two exponentially declining properties  - see text for \R-code}
+\label{fig:prop}
+\end{figure}
+\clearpage
+ \section{one-dimensional reactive-transport modelling in ReacTran}
+ Implementing a reactive-transport model in \rt proceeds in several steps.
+ 
+ \begin{itemize}
+   \item Setting up a finite difference grid and defining properties attached
+     to this grid (see previous section)
+   \item Specifying a model function that describes the rate of change of
+     substances due to transport and reaction.
+     The transport of properties is done with \rt function \code{tran.1D}
+   \item Solving the model. Depending on whether a transient or a
+     steady-state solution is desired, solving the model makes use of
+     functions \code{ode.1D} or \code{steady.1D} from packages \pkg{deSolve}
+     and \pkg{rootSolve}.
+ \end{itemize}
+ Below we first explain how to use \rt function \code{tran.1D}, after which it
+ is used in a model, which is consequently solved.
+
+  \subsection{R-function tran.1D}
+  The default input for the \code{tran.1D()} function in \proglang{R} is:
+  \begin{verbatim}
+    tran.1D(C, C.up = C[1], C.down = C[length(C)],
+      flux.up = NULL, flux.down = NULL, a.bl.up = NULL, C.bl.up = NULL,
+      a.bl.down = NULL, C.bl.down = NULL,
+      D = 0, v = 0, AFDW = 1, VF = 1, A = 1, dx,
+      full.check = FALSE, full.output = FALSE)
+  \end{verbatim}
+  with the following arguments:
+  \begin{itemize}
+    \item \code{C, C.up, C.down}. The concentrations, per unit of phase
+      volume, in the centre of each grid cell, a vector of length N
+      (\code{C}) and at the upstream or downstream boundary, one value
+      (\code{C.up, C.down}).
+    \item  \code{flux.up, flux.down}.  The fluxes, per unit of total surface,
+      at the upstream and downstream boundaries, ($M L^{-2} t^{-1}$).
+    \item \code{a.bl.up, C.bl.up, a.bl.down, C.bl.down}, the convective
+      transfer coefficients (\code{a.bl}, $L t^{-1}$) and boundary layer
+      concentrations \code{C.bl}
+    \item \code{D}, the diffusion (dispersion) coefficients, either
+      one value, or a vector (\code{D}) or packed as a \code{grid},
+      ($L^2 t^{-1}$).
+    \item \code{v}, the advective velocity ($L t^{-1}$).
+    \item \code{AFDW} the weights used in the finite difference
+      approximation for advection (-).
+    \item \code{VF}, the volume fractions (-).
+    \item \code{A} the surface areas ($L^2$)
+    \item \code{dx}, the distances between cell interfaces (L), the
+      discretization grid. Must be specified.
+    \item \code{full.check}, when \code{TRUE}, the consistency of the
+      input is checked.
+    \item \code{full.output}, when \code{TRUE} full output is returned.
+  \end{itemize}
+  
+  Note that several properties (\code{dx, D, v, AFDW, VF, A}) can be passed
+  in different ways:
+  \begin{itemize}
+    \item a single number, in which case they are assumed constant
+    \item a vector of length N+1, i.e. defined on the grid interfaces
+    \item a list of type \code{grid.1D} or of type \code{prop.1D}, as
+      created by \code{setup.grid} (spatial discretization) or by
+      \code{setup.prop.1D} (see previous section).
+  \end{itemize}
+
+  Function \code{reac.1D} returns the rate of change of \code{C} due to
+  transport, and the fluxes up-and downstream; if \code{full.output}
+  is \code{TRUE} then also the advective and dispersive fluxes at all
+  layer interfaces are returned.
+  
+  For example:
+<<>>=
+tran.1D(C=1:20, D=0, flux.up = 1, v=1, dx=1)
+tran.1D(C=1:20, D=0, flux.up = 1, v=1, dx=1, full.output=TRUE)
+@
+  \subsection{A 1-D reaction transport model}
+  Function \code{tran.1D} estimates the \emph{rate of change} of substances
+  as a function of \emph{transport} processes.
+
+  If, in addition to transport, reaction terms are added, a 1-D
+  \emph{reaction-transport model} is obtained.
+
+  In line with the way ordinary differential equations are solved in \R,
+  a reaction-transport model is specified in an \R-function that computes
+  the derivatives in the ODE at a certain time \code{t}.
+  
+  This function will be called by the solution methods as:
+  \code{func(t,y,parms,...)} where  \code{t} is the current time point,
+  \code{y} are the current values of the state variables in the ODE system
+  and \code{parms} are model parameters.
+  
+  It should return a list whose first element is a vector containing the
+  derivatives of y. (for more details, see packages \ds, \rs)
+  
+  For instance, the function representing the following model
+
+  \[
+    \frac{\partial C}{\partial t} = - v \cdot \frac{\partial C}{\partial x} - k C
+  \]
+  with boundary condition:
+  \[
+    v \cdot C|_{x=0} = F_0
+  \]
+
+  can be implemented in \R as:
+
+<<>>=
+    parms <- c(F0 = 1, v = 1, k = 0.1, dx = 1)
+@
+<<>>=
+    advModel <- function(t, C, parms) {
+    
+      with (as.list(parms), {
+
+        Tran <- tran.1D(C=C, D=0, flux.up = F0, v=v, dx=dx)
+        Consumption <-  k*C
+        dC   <- Tran$dC - Consumption
+        
+        return (list(dC = dC, Consumption= Consumption,
+                     flux.up = Tran$flux.up, flux.down = Tran$flux.down))
+      })
+
+    }
+
+@
+
+  Note the use of \code{with (as.list(parms),...} which allows to access by
+  name the previously defined model parameters (\code{parms}) within the function.
+
+  \subsection{Solving a 1-D reaction transport model}
+  In \R, 1-D models consisting of ordinary differential equations can
+  be solved in two ways.
+  \begin{itemize}
+    \item by estimating the \emph{steady-state condition}, using function
+      \code{steady.1D} from \R-package rootSolve \citep{rootSolve}.
+    \item by running the model \emph{dynamically}, using functions
+      \code{ode.1D}  from \R-package deSolve \citep{deSolve}.
+  \end{itemize}
+
+  To solve the above model to steady-state, we invoke \code{steady.1D}:
+<<>>=
+  out <- steady.1D(func=advModel, y=runif(25), parms=parms,
+                     nspec=1, positive=TRUE)
+
+@
+  Function \code{steady.1D} estimates the steady-state iteratively and
+  requires an initial guess of the state variables. For most cases, the
+  exact values are not important; the initial guess of the state variables
+  in the above example consists simply of 25 uniformly distributed random
+  numbers ([0,1]);
+
+  we specify that the model comprises only one species (\code{nspec} and
+  that we are interested only in a solution consisting of positive numbers
+  (\code{positive=TRUE}), as negative concentrations do not exist (in the
+  real environment; they may exist mathematically).
+  
+  The outcome of this model is a list called \code{out}, which contains
+  the steady-state condition of the state-variables (item \code{y}), the
+  consumption rate and the fluxes at the upper and lower boundary as
+  defined in function \code{advModel}. In addition,
+  attribute \code{precis} gives a measure of how far the system is from
+  steady-tate at each iteration of the steady-state solver; only two
+  iterations were needed.
+
+<<>>=
+out
+@
+  It can be plotted as:
+<<label=st1,include=FALSE>>=
+plot (out$y ,type="l",xlab="x", ylab="Conc")
+@
+
+\setkeys{Gin}{width=0.4\textwidth}
+\begin{figure}
+\begin{center}
+<<label=figst1,fig=TRUE,echo=FALSE>>=
+<<st1>>
+@
+\end{center}
+\caption{Solution of the uni-component reactive-transport model in 1-D
+  - see text for \R-code}
+\label{fig:st1}
+\end{figure}
+
+  It is good modelling practice to test mass conservation of a model,
+  i.e. as a check that mass is not created or destroyed by numerical
+  means (programming or modelling error).
+
+  For this simple example, it
+  is obvious that mass is conserved, but we will test it to exemplify
+  the procedures.
+
+  If mass is conserved and the system is at steady-state, then the net
+  input by transport in the system should equal the total net consumption.
+  For our model, the net input to the system is given by
+  \code{flux.up - flux.down}, while
+  the total consumption is simply the sum of the consumption in each box.
+<<>>=
+with (out, print(sum(Consumption)-(flux.up-flux.down)))
+@
+  The fact that the quantity is not completely zero is due to the small
+  deviation from steady-state (as is clear from attribute \code{precis}).
+  
+\subsection{example: 1-D transport in a porous spherical body}
+  This, somewhat more complex example models oxygen consumption in a
+  spherical aggregate. The example is more complex because it assumes
+  that both the surface area (\code{A}) and the volume fraction (\code{VF})
+  (here the "porosity") vary along the spatial axis.
+  
+  We start by formulating the model function (\code{Aggregate.Model}).
+
+<<>>=
+
+Aggregate.Model <- function(time,O2,pars) {
+
+  tran <- tran.1D(C=O2, C.down=C.ow.O2,
+    D=D.grid, A=A.grid,
+    VF=por.grid, dx=grid )
+
+  reac <- - R.O2*(O2/(Ks+O2))
+  return(list(dCdt = tran$dC + reac, reac = reac,
+              flux.up = tran$flux.up, flux.down = tran$flux.down))
+
+}
+@
+
+  next the parameters are defined:
+<<>>=
+C.ow.O2 <- 0.25     # concentration O2 water [micromol cm-3]
+por     <- 0.8      # porosity
+D       <- 400      # diffusion coefficient O2 [cm2 yr-1]
+v       <- 0        # advective velocity [cm yr-1]
+R.O2    <- 1000000  # O2 consumption rate [micromol cm-3 yr-1]
+Ks      <- 0.005    # O2 saturation constant [micromol cm-3]
+@
+  and the spatial extent of the model discretized (grid definition).
+<<>>=
+R <- 0.025           # radius of the agggregate [cm]
+N <- 100             # number of grid layers
+grid <- setup.grid.1D(x.up=0,L=R,N=N)
+@
+  We assume that porosity (the volume fraction) and the diffusion
+  coefficient are constant. Both properties ae defined as a grid list.
+<<>>=
+por.grid <- setup.prop.1D(value=por,grid=grid)
+D.grid <- setup.prop.1D(value=D,grid=grid)
+@
+
+  In this model, each "grid cell" is equivalent to a thin spherical region;
+  the further away from the origin, the larger the surface area of this layer.
+  
+  To take into account this expanding surface, we define a grid with the
+  surfaces of these spherical layers.  Function \code{sphere.surf}
+  calculates the surface of a sphere.
+
+<<>>=
+sphere.surf <- function (x) 4*pi*x^2
+A.grid  <- setup.prop.1D(func=sphere.surf,grid=grid)
+@
+
+The model is then solved to steady-state
+<<>>=
+O2.agg <- steady.1D (y = runif(N), func=Aggregate.Model, nspec=1,
+                     positive=TRUE, atol=1e-10)
+@
+
+and the output plotted
+<<label=agg,include=FALSE>>=
+par(mfrow=c(1,1))
+
+plot(grid$x.mid,O2.agg$y,xlab="distance from centre, cm",
+ylab="mmol/m3",
+main="Diffusion-reaction of O2 in a spherical aggregate")
+legend ("bottomright",pch=c(1,18),lty=1,col=c("black"),
+        c("O2 concentration"))
+@
+
+\setkeys{Gin}{width=0.4\textwidth}
+\begin{figure}
+\begin{center}
+<<label=figagg,fig=TRUE,echo=FALSE>>=
+<<agg>>
+@
+\end{center}
+\caption{Solution of the aggregate model - see text for \R-code}
+\label{fig:st1}
+\end{figure}
+@
+  Note that in this model, we have imposed a zero-flux boundary at the
+  centre of the sphere (or the "upstream" boundary) (zero-gradient is the default
+  boundary condition). This makes sense as we assume that the sphere is
+  symmetrical. However, oxygen is dffusing into the aggregate, at the
+  "downstream" boundary.
+  
+  The influx, per unit of surface area is in \code{O2.agg$flux.down}.
+<<>>=
+  O2.agg$flux.up
+  O2.agg$flux.down
+@
+
+  Calculating the mass conservation for this model is slightly more complex than
+  in previous example, as we need to take volumetric averages of the rates,
+  AND correct for the porosity effect.
+  
+  The volume in each spherical layer is simply equal to the surface at the
+  centre of the layer (\code{A.grid$mid}) times the grid size (\code{grid$dx}).
+  
+<<>>=
+ Volume <- A.grid$mid * grid$dx
+(Consump <- - sum(O2.agg$reac * Volume * por.grid$mid))
+@
+  The total flux into the aggregate equals the flux per unit surface times
+  the surface area at the downstream boundary:
+<<>>=
+ (Fluxin <- - O2.agg$flux.down*A.grid$int[N+1])
+@
+
+  The flux equals the total consumption, up to a certain numerical precision,
+  hence mass is conserved.
+<<>>=
+  Consump - Fluxin
+@
+\clearpage
+\section{volumetric advective-diffusive transport in an aquatic system}
+
+  The volumetric reaction-transport equation in 1-D is best derived in
+  two steps: first we rewrite the discretisation over a numerical grid:
+  \[
+    \frac{d C_i}{d t} = -\frac{1}{A}\cdot \frac{\Delta_i (A \cdot J)}
+    {\Delta x_i}+ reac_i
+  \]
+  as
+  \[
+    \frac{d C_i}{d t} = - \frac{\Delta_i (A \cdot J)}{\Delta V_i}+ reac_i
+  \]
+
+  where we defined cell-volume as the product of mid-surface and cell thickness
+  \[
+  V_i=A_i \Delta x_i
+  \]
+  and then redefine the mass fluxes:
+  \[
+   A \cdot J = -D  \cdot A \frac{\Delta C}{\Delta x} + A  \cdot u  \cdot C
+  \]
+  as :
+  \[
+    A \cdot J = - E \Delta C + Q  \cdot C
+  \]
+
+  where
+  $ Q=A \cdot u $ and $ E= \frac{D \cdot A}{\Delta x} $
+  are the  flow rate  and the bulk dispersion coefficient
+  respectively, both in units of $L^3 t^{-1}$.
+
+
+  Volumetric transport implies the use of total flows (mass per unit of time)
+  rather than fluxes (mass per unit of area per unit of time) as is done
+  in \code{tran.1D}.
+
+  \code{tran.volume.1D} implements this in \rt.
+
+  The \code{tran.volume.1D} routine is particularly suited for modelling
+  channels (like rivers, estuaries) where the cross-sectional area changes,
+  but where this area change is not explicitly modelled (as a function of time).
+
+  \subsection{R-function tran.volume.1D}
+  The default input for the \code{tran.volume1D()} function in \proglang{R} is:
+  \begin{verbatim}
+    tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
+      C.lat=0, F.up=NULL, F.down=NULL, F.lat=NULL,
+      Disp=NULL, flow = 0, flow.lat=NULL, AFDW = 1, V=NULL,
+      full.check = FALSE, full.output = FALSE)
+  \end{verbatim}
+  with the following arguments:
+  \begin{itemize}
+    \item \code{C, C.up, C.down}. The concentrations in the centre of each
+      grid cell, a vector of length N (\code{C}) and at the upstream or
+      downstream boundary, one value (\code{C.up, C.down}).
+    \item  \code{F.up, F.down}.  Total input at the upstream and
+      downstream boundaries, ($M t^{-1}$).
+    \item  \code{F.lat}.  Total input laterally, defined at the grid cells,
+      ($M t^{-1}$).
+    \item \code{Disp}, the bulk dispersion coefficients, ($L^3 t^{-1}$).
+    \item \code{Q}, the water flow rate, ($L^3 t^{-1}$).
+    \item \code{AFDW} the weights used in the finite difference
+      approximation for flow (-).
+    \item \code{V}, the volume of each grid cell ($L^3$).
+    \item \code{full.check}, when \code{TRUE}, the consistency of the
+      input is checked.
+    \item \code{full.output}, when \code{TRUE} full output is returned.
+  \end{itemize}
+
+  \subsection{An estuarine model}
+  Consider the following example that models organic carbon decay in an
+  estuary.
+
+  Two scenarios are simulated: the baseline includes only input
+  of organic matter at the upstream boundary. The second scenario simulates the
+  input of an important side river halfway the estuary.
+
+  The model is formulated in function \code{river.model}
+
+<<>>=
+river.model <- function (t=0,OC,pars=NULL)
+{
+  tran <- tran.volume.1D(C=OC,F.up=F.OC,F.lat=F.lat,Disp=Disp,
+      flow=flow,V=Volume)
+  reac <- - k*OC
+
+  return(list(dCdt = tran$dC + reac,
+            F.up = tran$F.up, F.down = tran$F.down,
+            F.lat = sum(tran$F.lat)))
+}
+@
+
+  The estuary is 100 km long (\code{lengthEstuary}; it is
+  subdivided in 500 grid cells (\code{nbox}).
+<<>>=
+nbox          <- 500                # number of grid cells
+lengthEstuary <- 100000             # length of estuary [m]
+BoxLength     <- lengthEstuary/nbox # [m]
+@
+  The estuarine cross-sectional area widens sigmoidally towards
+  the estuarine mouth (\code{CrossArea}); based on this area and
+  the lenght of a box, the volume of each box is easily estimated.
+<<>>=
+Distance      <- seq(BoxLength/2, by=BoxLength, len=nbox) # [m]
+
+CrossArea <- 4000 + 72000 * Distance^5 /(Distance^5+50000^5)
+
+Volume  <- CrossArea*BoxLength
+@
+
+  The dispersion coefficient (\code{Disp}) and the upstream flow rate
+  (\code{flow}) are parameters.
+<<>>=
+Disp    <- 1000   # m3/s, bulk dispersion coefficient
+flow    <- 180    # m3/s, mean river flow
+@
+  The organic carbon input on upstream boundary (\code{F.OC}),
+  the lateral input of carbon (\code{F.lat.0}) and the decay rate of
+  organic carbon (\code{k}) are declared next:
+<<>>=
+F.OC    <- 180               # input organic carbon [mol s-1]
+F.lat.0 <- F.OC              # lateral input organic carbon [mol s-1]
+
+k       <- 10/(365*24*3600)  # decay constant organic carbon [s-1]
+@
+  In the first scenario, the lateral flux of material is zero.
+<<>>=
+F.lat <- rep(0,length.out=nbox)
+@
+  The model is solved using \rs function \code{steady.1D} which finds the
+  steady-state solution, given an initial guess, \code{y}
+  (here simply 500 random numbers).
+<<>>=
+sol  <- steady.1D(y=runif(nbox), fun=river.model, nspec=1, atol=1e-15,
+                    rtol=1e-15, positive = TRUE)
+Conc1 <- sol$y
+@
+  In the second scenario, there is lateral input of organic carbon:
+<<>>=
+F.lat <- F.lat.0*dnorm(x=Distance/lengthEstuary,
+                       mean = Distance[nbox/2]/lengthEstuary,
+                       sd = 1/20, log = FALSE) /nbox
+sol2<- steady.1D(runif(nbox), fun=river.model, nspec=1, atol=1e-15,
+                    rtol=1e-15, positive = TRUE)
+Conc2 <- sol2$y
+@
+We set the tolerances for the steady-state calculation (\code{atol} and
+\code {rtol}) to a very small value so that the mass budget is very tight
+(see below).
+
+Finally the output is plotted.
+
+<<label=est,include=FALSE>>=
+matplot(Distance/1000,cbind(Conc1,Conc2),lwd=2,
+main="Organic carbon decay in an estuary",xlab="distance [km]",
+ylab="OC Concentration [mM]",
+type="l")
+legend ("topright",lty=1,col=c("black","red"),
+        c("baseline","with lateral input"))
+@
+\setkeys{Gin}{width=0.4\textwidth}
+\begin{figure}
+\begin{center}
+<<label=est,fig=TRUE,echo=FALSE>>=
+<<est>>
+@
+\end{center}
+\caption{Solution of the estuarine model - see text for \R-code}
+\label{fig:st1}
+\end{figure}
+
+and a budget estimated
+(total input = consumption)
+<<>>=
+sol$F.up + sol$F.lat - sol$F.down - sum(sol$y*k*Volume)
+@
+\clearpage
+  \section{Transport in two dimensions}
+  
+  The function that performs transport in two
+  dimensions is similar to its 1-D equivalent.
+  
+  Here is its default input
+\begin{verbatim}
+tran.2D ( C, C.x.up=C[1,], C.x.down=C[nrow(C),],
+  C.y.up=C[,1], C.y.down=C[,ncol(C)],
+  flux.x.up=NULL, flux.x.down=NULL, flux.y.up=NULL, flux.y.down=NULL,
+  a.bl.x.up=NULL, C.bl.x.up=NULL, a.bl.x.down=NULL, C.bl.x.down=NULL,
+  a.bl.y.up=NULL, C.bl.y.up=NULL, a.bl.y.down=NULL, C.bl.y.down=NULL,
+  D.grid=NULL, D.x=NULL, D.y=D.x,
+  v.grid=NULL, v.x=0, v.y=0,
+  AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x,
+  VF.grid=NULL,VF.x=1, VF.y=VF.x,
+  A.grid=NULL, A.x=1, A.y=1,
+  grid=NULL, dx=NULL, dy=NULL,
+  full.check = FALSE, full.output = FALSE)
+
+}
+\end{verbatim}
+  where
+  \begin{itemize}
+    \item \code{C, C.x.up, C.x.down, C.y.up, C.y.down} are the concentration in
+      the 2-D grid (\code{C}) and the boundary concentrations
+    \item \code{flux.x.up, flux.x.down, ...} are the fluxes
+      prescribed at the boundaries,
+    \item \code{a.bl.up, C.bl.up, ...} are the parameters for
+      transfer across the various boundary layers
+    \item \code{D.x, ...} are the diffusion coefficients
+    \item \code{v.x, ...} are the advective velocities
+    \item \code{AFDW.x, ...} are the weights used in the numerical
+      approximation of the advective component
+    \item \code{VF.x, ...} are the volume fractions of the various phases
+    \item \code{A.x, ...} are the surface areas
+    \item \code{dx, dy, grid} define the discretisation grid
+    \item \code{full.check, full.output} whether full output needs writing
+      or the input needs checking
+  \end{itemize}
+  By making clever use of the surface areas, it is possible to describe
+  reactive transport processes in a 2-D channel with variable surface area,
+  e.g. for widening estuaries that are stratified.
+  
+  It is also possible to mimic certain 3-D applications, e.g. by assuming
+  cylindrical symmetries.
+
+  \subsection{example of transport in 2 dimensions}
+  We model the dynamics of oxygen, on a 2-D grid, and subjected to diffusion
+  in the two directions, to advection in y-direction, from left to right,
+  first-order consumption and a source in a central spot (e.g. an
+  animal ventilating its burrow).
+
+  At the upper boundary, the concentration is 300 mM, the other boundaries
+  are zero-flux boundaries.
+
+  We start by defining the parameters and the grid
+<<>>=
+n     <- 100           # number of grid cells
+dy    <- dx <- 100/n   # grid size
+
+Dy    <- Dx <- 5   # diffusion coeff, X- and Y-direction
+r     <- -0.02     # production/consumption rate
+Bc    <- 300       # boundary concentration
+irr   <- 20        # irrigation rate
+vx    <- 1         # advection
+@
+  As initial concentrations we assume that oxygen is 0 everywhere.
+
+<<>>=
+y  <- matrix(nr=n,nc=n,0)
+@
+  In the model function, the state variables are passed as one vector
+  (\code{y}). They are recast as a matrix first (\code{CONC}).
+<<>>=
+Diff2D <- function (t, y, parms, N)
+
+{
+  CONC <- matrix(nr=N, nc=N, y)
+# Transport
+
+   Tran    <-tran.2D(CONC, D.x=Dx, D.y=Dy, C.y.down=Bc,
+                     dx=dx, dy=dy, v.x = vx)
+
+# transport + reaction
+   dCONC   <- Tran$dC + r*CONC
+
+# Bioirrigation in a central spot
+    mid <- N/2
+    dCONC[mid,mid] <- dCONC[mid,mid]  + irr*(Bc-CONC[mid,mid])
+
+  return (list(as.vector(dCONC)))
+}
+@
+  The model is solved in two ways.
+  \begin{itemize}
+    \item \code{steady.2D} solves the steady-state condition
+    \item \code{ode.2D} runs the model dynamically
+  \end{itemize}
+  The model consists of 100*100 = 10000 equations.
+  We print the time it takes to obtain these solutions (in seconds).
+  
+  Note that for both these methods, we need to pass the dimension of the
+  problem (e.g. the number of boxes in x and y-direction), and the work-
+  space required (\code{lrw}).
+  
+<<>>=
+print(system.time(
+std  <-  steady.2D(func=Diff2D, y=as.vector(y), time=0, N=n,
+          parms=NULL, lrw=1000000, dimens=c(n,n),
+          nout=0, positive=TRUE)
+))
+@
+  We run the model for 200 time units, producing output every 5 units.
+<<>>=
+times <- seq(0,100,5)
+print(system.time(
+  out2  <-  ode.2D(func=Diff2D, y=as.vector(y), times=times, N=n,
+            parms=NULL, lrw=10000000, dimens=c(n,n))
+))
+@
+<<label=twod5,include=FALSE>>=
+mat  <-  matrix(nr=n,nc=n,out2[5,-1])
+filled.contour(mat,zlim=c(0,Bc), color=femmecol,main="after 20 time units")
+@
+\setkeys{Gin}{width=0.4\textwidth}
+\begin{figure}
+\begin{center}
+<<label=twod,fig=TRUE,echo=FALSE>>=
+<<twod5>>
+@
+\end{center}
+\caption{Solution of the 2-dimensional diffusion and
+irrigation model, after 20 time units - see text for \R-code}
+\label{fig:twod}
+\end{figure}
+<<label=twodst,include=FALSE>>=
+mat  <-  matrix(nr=n,nc=n,std$y)
+filled.contour(mat,zlim=c(0,Bc), color=femmecol,main="steady-state")
+@
+\setkeys{Gin}{width=0.4\textwidth}
+\begin{figure}
+\begin{center}
+<<label=twodst,fig=TRUE,echo=FALSE>>=
+<<twodst>>
+@
+\end{center}
+\caption{Steady-state solution of the 2-dimensional diffusion and
+irrigation model - see text for \R-code}
+\label{fig:twodst}
+\end{figure}
+
+  \section{finally}
+This vignette was made with Sweave \citep{Leisch02}.
+
+
+\clearpage
+\bibliography{bibs}
+
+\end{document}

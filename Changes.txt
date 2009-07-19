@@ -1,0 +1,67 @@
+# Filip: 
+
+Opsplitsen files properties en geometries
+ 
+Aanpassingen in Tran.1D:
+- grid weggelaten als argument (nu onder dx gezet, dus nu kan dx een list zijn)
+- error check aangepast (was niet consistent)
+- any(v$int>0) formuleringen aangepast in de berekening boundary condities. Wordt (v$int[1]>0) en (v$int[N+1]>0)
+  
+   
+
+
+# Karline: DONE most things EXCEPT
+
+Tran.volume.1D: ook u (advectie) - TOCH NIET GEDAAN - VERWARREND...
+MOET DAN MAAR IN 2 STAPPEN...  -> uitleggen aan hand van vis voorbeeld
+
+
+Changes in Tran.volume.1D:
+EITHER flow is a vector and flow.lat is NULL -> flow.lat is estimated
+OR
+flow is one value, the flow rate at upstream boundary and flow.lat has a value
+flow[1] + flow.lat used to estimate flow
+
+added Ash-Free Dry Weight (sic)
+
+Allow negative flow rates in tran.1D.volume OK - NOG TESTEN !
+
+
+?negative flow.lat????
+
+Allow negative flow rates in tran.2D
+
+
+
+# QUESTION:
+
+default value for C.lat=0 ? (prefer C.lat = C)
+
+made tran.2D en tran.volume.1D compatible with tran.1D
+
+
+
+
+#### GEVAARLIJKE OPTIES:    WAARSCHUWEN
+# VF als vector !
+## Zie Sidia.r
+
+In SiDia model:
+
+Porosity <- exp.profile(Grid$x.int, y.0=p.0, y.inf=p.inf, x.att=0.5)
+Por.mid  <- exp.profile(Grid$x.mid, y.0=p.0, y.inf=p.inf, x.att=0.5)
+
+EN in transport:
+
+... VF = Porosity ....
+
+ dDSi        <- DSiTran$dC                      +           # transport
+                Dissolution * (1-Por.mid)/Por.mid           # biogeochemistry
+
+
+GEVOLG: massa budget NIET gesloten. Probleem: 2 verschillende porositeiten:
+Por. mid  voor geochemie; 0.5*(Porosity[1:N]+Porosity[2:(N+1)]) voor transport
+
+
+##
+zero-gradient en niet-backward advection -> influx ! keep in mind
