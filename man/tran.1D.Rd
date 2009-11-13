@@ -70,44 +70,44 @@ tran.1D(C, C.up = C[1], C.down = C[length(C)],
   \item{VF }{Volume fraction defined at the grid cell interfaces. One value,
     a vector of length N+1, or a \code{1D property} list; the list
     contains at least the elements \code{int} and \code{mid}
-    (see \code{\link{setup.prop.1D}}) [-].
+    (see \code{\link{setup.prop.1D}}) [-]
   }
   \item{A }{Interface area defined at the grid cell interfaces. One value,
     a vector of length N+1, or a \code{1D grid property} list; the list
     contains at least the elements \code{int} and \code{mid}
-    (see \code{\link{setup.prop.1D}}) [L2].
+    (see \code{\link{setup.prop.1D}}) [L2]
   }
   \item{dx }{distance between adjacent cell interfaces (thickness of grid
     cells). One value, a vector of length N, or a \code{1D grid} list containing
     at least the elements
-    \code{dx} and \code{dx.aux} (see \code{\link{setup.grid.1D}}) [L].
+    \code{dx} and \code{dx.aux} (see \code{\link{setup.grid.1D}}) [L]
   }
   \item{full.check }{logical flag enabling a full check of the consistency
     of the arguments (default = \code{FALSE}; \code{TRUE} slows down execution
-    by 50 percent).
+    by 50 percent)
   }
   \item{full.output }{logical flag enabling a full return of the output
-    (default = \code{FALSE}; \code{TRUE} slows down execution by 20 percent).
+    (default = \code{FALSE}; \code{TRUE} slows down execution by 20 percent)
   }
 }
 
 \value{
   \item{dC }{the rate of change of the concentration C due to transport,
     defined in the centre of each grid cell. The rate of change is expressed
-    per unit of phase volume [M/L3/T].
+    per unit of phase volume [M/L3/T]
   }
-  \item{C.up }{concentration at the upstream interface. One value [M/L3].
+  \item{C.up }{concentration at the upstream interface. One value [M/L3]
     only when (\code{full.output} = \code{TRUE})
   }
-  \item{C.down }{concentration at the downstream interface. One value [M/L3].
+  \item{C.down }{concentration at the downstream interface. One value [M/L3]
     only when (\code{full.output} = \code{TRUE})
   }
   \item{adv.flux }{advective flux across at the interface of each grid cell.
-    A vector of length N+1 [M/L2/T].
+    A vector of length N+1 [M/L2/T]
     only when (\code{full.output} = \code{TRUE})
   }
   \item{dif.flux }{diffusive flux across at the interface of each grid cell.
-    A vector of length N+1 [M/L2/T].
+    A vector of length N+1 [M/L2/T]
     only when (\code{full.output} = \code{TRUE})
   }
   \item{flux }{total flux across at the interface of each grid cell. A vector
@@ -115,10 +115,10 @@ tran.1D(C, C.up = C[1], C.down = C[length(C)],
     only when (\code{full.output} = \code{TRUE})
   }
   \item{flux.up }{flux across the upstream boundary, positive = INTO model
-    domain. One value [M/L2/T].
+    domain. One value [M/L2/T]
   }
   \item{flux.down }{flux across the downstream boundary, positive = OUT of
-    model domain. One value [M/L2/T].
+    model domain. One value [M/L2/T]
   }
 }
 \author{

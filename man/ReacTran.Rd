@@ -2,20 +2,18 @@
 \alias{ReacTran-package}
 \alias{ReacTran}
 \docType{package}
-\title{
-  Reactive Transport Modelling in 1D, 2-D and 3-D
-}
+\title{Reactive transport modelling in 1D, 2D and 3D}
 \description{
   
   R-package ReacTran contains routines that enable the development of
-  reactive transport models in aquatic
-  systems (rivers, lakes), porous media (floc aggregates, sediments,...) and
+  reactive transport models in aquatic systems (rivers, lakes, oceans), 
+  porous media (floc aggregates, sediments,...) and
   even idealized organisms (spherical cells, cylindrical worms,...).
 
   The geometry of the model domain is either one-dimensional, two-dimensional
   or three-dimensional.
   
-  It contains:
+  The package contains:
   \itemize{
     \item Functions to setup a finite-difference grid (1D or 2D)
     \item Functions to attach parameters and properties to this grid (1D or 2D)

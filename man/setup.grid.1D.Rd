@@ -42,38 +42,38 @@ setup.grid.1D(x.up=0, x.down=NULL, L=NULL, N=NULL, dx.1=NULL,
 }
 
 \arguments{
-  \item{x.up }{position of the upstream interface; one value
+  \item{x.up }{position of the upstream interface; one value [L]
   }
   \item{x.down }{position of the endpoint of each zone; one value when the
     model domain covers only one zone (\code{x.down} = position of downstream
     interface), or a vector of length M when the model domain is divided into
-    M zones (\code{x.down[M]} = position of downstream interface)
+    M zones (\code{x.down[M]} = position of downstream interface) [L]
   }
   \item{L }{thickness of zones; one value (model domain = one zone) or a
-    vector of length M (model domain = M zones)
+    vector of length M (model domain = M zones) [L]
   }
   \item{N }{number of grid cells within a zone; one value or a vector of
-    length M
+    length M [-]
   }
   \item{dx.1 }{size of the first grid cell in a zone; one value or a vector
-    of length M
+    of length M [L]
   }
   \item{p.dx.1 }{power factor controlling the increase in grid cell size near
     the upstream boundary; one value or a vector of length M. The default
-    value is 1 (constant grid cell size)
+    value is 1 (constant grid cell size) [-]
   }
   \item{max.dx.1 }{maximum grid cell size in the upstream half of the zone;
-    one value or a vector of length M
+    one value or a vector of length M [L]
   }
   \item{dx.N }{size of the last grid cell in a zone; one value or a vector
-    of length M
+    of length M [L]
   }
   \item{p.dx.N }{power factor controlling the increase in grid cell size near the
     downstream boundary; one value or a vector of length M. The default value
-    is 1 (constant grid cell size)
+    is 1 (constant grid cell size) [-]
   }
   \item{max.dx.N }{maximum grid cell size in the downstream half of the zone;
-    one value or a vector of length M
+    one value or a vector of length M [L]
   }
   
   \item{x }{the object of class \code{grid.1D} that needs plotting
@@ -85,25 +85,25 @@ setup.grid.1D(x.up=0, x.down=NULL, L=NULL, N=NULL, dx.1=NULL,
 \value{
   a list of type \code{grid.1D} containing:
 
-  \item{N }{the total number of grid cells
+  \item{N }{the total number of grid cells [-]
   }
-  \item{x.up }{position of the upstream interface; one value
+  \item{x.up }{position of the upstream interface; one value [L]
   }
-  \item{x.down }{position of the downstream interface; one value
+  \item{x.down }{position of the downstream interface; one value [L]
   }
   \item{x.mid }{position of the middle of the grid cells;
-    vector of length \code{N}
+    vector of length \code{N} [L]
   }
   \item{x.int }{position of the interfaces of the grid cells;
-    vector of length \code{N+1}
+    vector of length \code{N+1} [L]
   }
   \item{dx }{distance between adjacent cell interfaces (thickness of grid
-    cells); vector of length \code{N}
+    cells); vector of length \code{N} [L]
   }
   \item{dx.aux }{auxiliary vector containing the distance between adjacent
     cell centers; at the upper and lower boundary calculated as
     (\code{x[1]-x.up}) and (\code{x.down-x[N]}) respectively; vector of
-    length \code{N+1}
+    length \code{N+1} [L]
   }
 }
 

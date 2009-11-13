@@ -17,5 +17,5 @@
 ## sigmoid decline
 
  p.sig <- function(x, y.0=1, y.inf=0.5, x.L=0, x.att=1)
-        return(y.inf + (y.0-y.inf)*exp(-(x-(x.L+0.5*x.att))/(0.25*x.att))/(1+exp(-(x-(x.L+0.5*x.att))/(0.25*x.att))))
+        return(y.inf + (y.0-y.inf)*exp(-(x-x.L)/(0.25*x.att))/(1+exp(-(x-x.L)/(0.25*x.att))))
 

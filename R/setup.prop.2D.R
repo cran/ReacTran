@@ -33,9 +33,15 @@ setup.prop.2D <- function(func = NULL, y.func = func, value = NULL, y.value = va
     x.mid <- matrix(nrow=length(grid$x.mid),ncol=length(grid$y.mid))
 
     for (i in 1:length(grid$x.int))
-      x.int[i,] <- func(grid$x.int[i],grid$y.mid,...)
+    {
+      for (j in 1:length(grid$y.mid))
+          x.int[i,j] <- func(grid$x.int[i],grid$y.mid[j],...)
+    }
     for (i in 1:length(grid$x.mid))
-      x.mid[i,] <- func(grid$x.mid[i],grid$y.mid,...)
+    {
+      for (j in 1:length(grid$y.mid))
+          x.mid[i,j] <- func(grid$x.mid[i],grid$y.mid[j],...)
+    }
   }
 
   if (!is.null(y.func)) { # profile specification via function
@@ -43,9 +49,15 @@ setup.prop.2D <- function(func = NULL, y.func = func, value = NULL, y.value = va
     y.mid <- matrix(nrow=length(grid$x.mid),ncol=length(grid$y.mid))
 
     for (i in 1:length(grid$x.mid))
-      y.int[i,] <- y.func(grid$x.mid[i],grid$y.int,...)
+    {
+      for (j in 1:length(grid$y.int))
+          y.int[i,j] <- y.func(grid$x.mid[i],grid$y.int[j],...)
+    }
     for (i in 1:length(grid$x.mid))
-      y.mid[i,] <- y.func(grid$x.mid[i],grid$y.mid,...)
+    {
+      for (j in 1:length(grid$y.mid))
+          y.mid[i,j] <- y.func(grid$x.mid[i],grid$y.mid[j],...)
+    }
   }
   
   Res <- list(x.mid = x.mid,

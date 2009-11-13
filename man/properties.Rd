@@ -35,10 +35,10 @@
      
     \item \code{p.sig}: sigmoidal decreasing transition
       \deqn{
-         y = y_{inf} + (y_0-y_{inf})\frac{\exp(-(x-(x_L + 0.5 x_{att}))/
-         (0.25 x_{att}))}{(1+\exp(-(x-(x_L+0.5*x_{att}))/(0.25 x_{att}))})
-        }{y=yinf+(y0-yinf)exp(-x-(xL+0.5xatt)/(0.25xatt)) /
-        (1+exp(-x-(xL+0.5xatt)/(0.25xatt)))}
+         y = y_{inf} + (y_0-y_{inf})\frac{\exp(-(x-x_L)/
+         (0.25 x_{att}))}{(1+\exp(-(x-x_L))/(0.25 x_{att}))})
+        }{y=yinf+(y0-yinf)exp(-(x-xL)/(0.25xatt)) /
+        (1+exp(-(x-xL)/(0.25xatt)))}
   }
 }
 
@@ -73,8 +73,7 @@ p.sig(x, y.0=1, y.inf=0.5, x.L=0, x.att=1)
   For \code{p.lin}, the width of the transition zone equals \code{x.att} and
   the depth where the transition zone starts is \code{x.L}.
   
-  For \code{p.sig}, the transition is smooth, but most pronounced in the
-  transition zone.
+  For \code{p.sig}, \code{x.L} is located the middle of the smooth transition zone of approaximate width \code{x.att}.  
   
   For \code{p.exp}, there is no clearly demarcated transition zone;
   there is an abrupt change at \code{x.L} after which the property

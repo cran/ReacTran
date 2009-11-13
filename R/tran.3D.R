@@ -15,39 +15,42 @@ diff3D <- function(AR, along) {
 
 # function to bind two matrices to an array
    mbind <- function (Mat1, Array, Mat2, along=1)  {
-     dimens <- dim(Array) + c(0,0,2)
+     dimens <- dim(Array)
+     dimens[along] <- dimens[along]+2
      if (along==3)
        array(dim=dimens, data=c(Mat1,Array,Mat2))
      else if (along == 1)
-       aperm(array(dim=dimens,
-         data=c(Mat1,aperm(Array,c(3,2,1)),Mat2)),c(3,2,1))
+       aperm(array(dim=dimens[c(3,2,1)],
+         data=c(t(Mat1),aperm(Array,c(3,2,1)),t(Mat2))),c(3,2,1))
      else if (along == 2)
-       aperm(array(dim=dimens,
-         data=c(Mat1,aperm(Array,c(1,3,2)),Mat2)),c(1,3,2))
+       aperm(array(dim=dimens[c(1,3,2)],
+         data=c( Mat1,aperm(Array,c(1,3,2)), Mat2)),c(1,3,2))
    }
 
 # function to bind a matrix to an array on the left
    mbindl <- function (Mat1, Array, along=1)  {
-     dimens <- dim(Array) + c(0,0,1)
+     dimens <- dim(Array)
+     dimens[along] <- dimens[along]+1
      if (along==3)
        array(dim=dimens, data=c(Mat1,Array))
      else if (along == 1)
-       aperm(array(dim=dimens,
-         data=c(Mat1,aperm(Array,c(3,2,1)))),c(3,2,1))
+       aperm(array(dim=dimens[c(3,2,1)],
+         data=c(t(Mat1),aperm(Array,c(3,2,1)))),c(3,2,1))
      else if (along == 2)
-       aperm(array(dim=dimens,
+       aperm(array(dim=dimens[c(1,3,2)],
          data=c(Mat1,aperm(Array,c(1,3,2)))),c(1,3,2))
    }
 # function to bind a matrix to an array on the right
    mbindr <- function (Array, Mat2, along=1)  {
-     dimens <- dim(Array) + c(0,0,1)
+     dimens <- dim(Array)
+     dimens[along] <- dimens[along]+1
      if (along==3)
        array(dim=dimens, data=c(Array,Mat2))
      else if (along == 1)
-       aperm(array(dim=dimens,
-         data=c(aperm(Array,c(3,2,1)),Mat2)),c(3,2,1))
+       aperm(array(dim=dimens[c(3,2,1)],
+         data=c(aperm(Array,c(3,2,1)),t(Mat2))),c(3,2,1))
      else if (along == 2)
-       aperm(array(dim=dimens,
+       aperm(array(dim=dimens[c(1,3,2)],
          data=c(aperm(Array,c(1,3,2)),Mat2)),c(1,3,2))
    }
 

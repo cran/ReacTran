@@ -19,7 +19,7 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
 
   if (is.null(x.down[1])) {
     if (any(L<0)) stop (paste("Error in setup.grid.1D! L[",which(L<0),"] < 0",sep=""))
-    x.down <- cumsum(L)
+    x.down <- x.up + cumsum(L)
   }
   
 ## If the interval lengths are given, create the end points of each zone 
@@ -44,6 +44,9 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
 ## root of this function determines the power factor that corresponds to a 
 ## desired number of cells N 
 
+  p1 <- 1.00001
+  p2 <- 3
+  
   f.root <- function(p,dx,N,L) dx*(p^(N)-1)/(p-1) - L
 
 ## Loop over all grid zones
@@ -114,7 +117,11 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
         stop (paste("Error in setup.grid.1D! dx.1[",i,"] > L[",i,"]",sep=""))
   
       # estimate power in power law 
-      p.estim <- uniroot(f=f.root,dx=dx.1[i],N=N[i],L=L[i],lower=1.001,upper=2)$root
+      if (f.root(p=p1,dx.1[i],N[i],L[i])*f.root(p=p2,dx.1[i],N[i],L[i]) >= 0)
+      {
+      A.dx <- rep(L[i]/N[i],times=N[i])
+      } else {
+      p.estim <- uniroot(f=f.root,dx=dx.1[i],N=N[i],L=L[i],lower=p1,upper=p2)$root
       # use gradual increase of grid cell size at upper interface 
       A.dx <- vector()
       pos <- vector()
@@ -128,7 +135,8 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
       }
      # rescaling to fit the interval length 
       A.dx <- A.dx*(L[i]/pos[length(pos)])
-    }
+      }
+   }
 
 ## Option 5: N[i] and dx.N[i] are specified, dx.1[i] = NULL 
 
@@ -140,8 +148,12 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
       if (dx.N[i] > L[i])
         stop (paste("Error in setup.grid.1D! dx.N[",i,"] > L[",i,"]",sep=""))
   
-      # estimate power in power law 
-      p.estim <- uniroot(f=f.root,dx=dx.N[i],N=N[i],L=L[i],lower=1.001,upper=2)$root
+      if (f.root(p=p1,dx.N[i],N[i],L[i])*f.root(p=p2,dx.N[i],N[i],L[i]) >= 0)
+      {
+      A.dx <- rep(L[i]/N[i],times=N[i])
+      } else {
+     # estimate power in power law 
+      p.estim <- uniroot(f=f.root,dx=dx.N[i],N=N[i],L=L[i],lower=p1,upper=p2)$root
       # use gradual increase of grid cell size at upper interface 
       A.dx <- vector()
       pos <- vector()
@@ -155,11 +167,12 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
       }
      # rescaling to fit the interval length 
       A.dx <- A.dx*(L[i]/pos[length(pos)])
+      }
      # reversing the A.dx vector
       A.dx <- A.dx[length(A.dx):1]
     }
 
-## Option 6: dx.1[i] and dx.N[i] are specified, N[i] = NULL 
+## Option 6: dx.1[i] and dx.N[i] are specified, N[i] can be NULL 
 
     if (!(is.null(dx.1[i])) && !(is.null(dx.N[i])))  { 
 
@@ -172,12 +185,29 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
       if (dx.N[i] > L[i]/2)
         stop (paste("Error in setup.grid.1D! dx.N[",i,"] > L[",i,"]",sep=""))
 
+      L.A <- 0.5*L[i]
+      L.B <- 0.5*L[i]
+
       # estimate power in power law 
       if (!is.null(N[i])) {
+      
       N.A <- as.integer(N[i]/2) 
       N.B <- N[i] - N.A
-      p.dx.1[i] <- uniroot(f=f.root,dx=dx.1[i],N=N.A,L=0.5*L[i],lower=1.001,upper=2)$root
-      p.dx.N[i] <- uniroot(f=f.root,dx=dx.N[i],N=N.B,L=0.5*L[i],lower=1.001,upper=2)$root
+      L.A <- (N.A/N[i])*L[i]
+      L.B <- L[i] - L.A
+      
+      if (f.root(p=p1,dx.1[i],N.A,L.A)*f.root(p=p2,dx.1[i],N.A,L.A) >= 0)
+      {
+        p.dx.1[i] <- 1
+        } else {
+        p.dx.1[i] <- uniroot(f=f.root,dx=dx.1[i],N=N.A,L=L.A,lower=p1,upper=p2)$root
+      }
+      if (f.root(p=p1,dx.N[i],N.B,L.B)*f.root(p=p2,dx.N[i],N.B,L.B) >= 0)
+      {
+        p.dx.N[i] <- 1
+        } else {
+        p.dx.N[i] <- uniroot(f=f.root,dx=dx.N[i],N=N.B,L=L.B,lower=p1,upper=p2)$root
+      }
       }
       # use gradual increase of grid cell size at upsteam interface
       A.dx  <- vector()
@@ -185,12 +215,12 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
       A.dx[1] <- dx.1[i]
       pos[1] <- dx.1[i]
       j <- 1
-      while ((is.null(N[i])&&(pos[j] < 0.5*L[i]))||(!is.null(N[i])&&(j < N.A))) {
+      while ((is.null(N[i])&&(pos[j] < L.A))||(!is.null(N[i])&&(j < N.A))) {
          j <- j + 1
          A.dx[j] <- min(max.dx.1[i],A.dx[j-1]*p.dx.1[i])
          pos[j] <- pos[j-1] + A.dx[j]
       }
-      A.dx <- A.dx*(0.5*L[i]/pos[length(pos)])
+      A.dx <- A.dx*(L.A/pos[length(pos)])
 
       # use gradual increase of grid cell size at downsteam interface
       B.dx  <- vector()
@@ -198,12 +228,12 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
       B.dx[1] <- dx.N[i]
       pos[1] <- dx.N[i]
       j <- 1
-      while ((is.null(N[i])&&(pos[j] < 0.5*L[i]))||(!is.null(N[i])&&(j < N.B))) {
+      while ((is.null(N[i])&&(pos[j] < L.B))||(!is.null(N[i])&&(j < N.B))) {
         j <- j + 1
         B.dx[j] <- min(max.dx.N[i],B.dx[j-1]*p.dx.N[i])
         pos[j] <- pos[j-1] + B.dx[j]
       }
-      B.dx <- B.dx*(0.5*L[i]/pos[length(pos)])
+      B.dx <- B.dx*(L.B/pos[length(pos)])
       # assemble the distance vector 
       A.dx <- c(A.dx,B.dx[length(B.dx):1])
     }
@@ -247,4 +277,3 @@ plot.grid.1D <- function(x,...) {
   points(0.5+(1:x$N),x$dx,pch=16)
   legend("topleft",c("dx.aux","dx.mid"),pch=c(1,16))
 }
-

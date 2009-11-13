@@ -23,23 +23,24 @@ fiadeiro(v, D, dx.aux=NULL, grid=list(dx.aux=dx.aux))
 
 \arguments{
   \item{v }{advective velocity; either one value or a vector of length N+1,
-    with N the number of grid cells [L/T].
+    with N the number of grid cells [L/T]
   }
   \item{D }{diffusion coefficient; either one value or a vector of length N+1
-    [L2/T].
+    [L2/T]
   }
   \item{dx.aux }{auxiliary vector containing the distances between the
     locations where the concentration is defined (i.e. the grid cell centers
-    and the two outer interfaces); either one value or a vector of length N+1.
+    and the two outer interfaces);
+    either one value or a vector of length N+1 [L]
   }
-  \item{grid }{discretization grid as calculated by \code{\link{setup.grid.1D}}.
+  \item{grid }{discretization grid as calculated by \code{\link{setup.grid.1D}}
   }
 }
 
 \value{
   the Advective Finite Difference Weighing (AFDW) coefficients as used in 
   the transport routines \code{\link{tran.1D}} and \code{\link{tran.volume.1D}};
-  either one value or a vector of length N+1
+  either one value or a vector of length N+1 [-]
 }
 
 \author{
@@ -216,7 +217,7 @@ legend=c("backward diff","centred diff","Fiadeiro&Veronis")
   and switches to backward differing when needed (when advection dominates).
   The switching is determined by the Peclet number
   
-  \code{Pe = abs(v)*dx.aux/D}.
+  \code{Pe = abs(v)*dx.aux/D}
   
   \itemize{
     \item the higher the diffusion \code{D} (\code{Pe > 1}), the closer the
