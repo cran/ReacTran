@@ -9,7 +9,18 @@ setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL,
   max.dx.N = L) {
 
 ## Check on the input
-
+  if (is.null(L)){
+    if (is.null(N) && is.null(dx.1))
+      stop ("either the length (L) and the end point (x.down) or the number of boxes,(N) and size of boxes (dx.1 should be specified")
+    if (is.null(N) && ! is.null(dx.1)) 
+      if (is.null(x.down))
+       stop("either the length (L) or the end points (x.up, x.down) and N should be specified")  
+    if (! is.null(x.down))
+      L = x.down-x.up
+    else
+      L = N * dx.1
+  }
+  
   for (i in 1:length(L)) {
   if (is.null(x.down[i]) && is.null(L[i]))
     stop (paste("Error in setup.grid.1D! Grid zone",i,": either the length (L) or the end point (x.down) should be specified"))

@@ -4,9 +4,8 @@
 ##==============================================================================
 
 tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
-     flux.up=NULL, flux.down=NULL, a.bl.up=NULL, C.bl.up=NULL,
-		 a.bl.down=NULL, C.bl.down=NULL,
-     D=0, v=0, AFDW=1, VF=1, A=1,
+     flux.up=NULL, flux.down=NULL, a.bl.up=NULL, 
+		 a.bl.down=NULL, D=0, v=0, AFDW=1, VF=1, A=1,
      dx, full.check = FALSE, full.output = FALSE) {
 
 
@@ -82,9 +81,6 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
       if (!((length(v$int)==1) || (length(v$int)==(N+1))))
         stop("error: v should be a vector of length 1 or N+1")
     }
-## This constraint no longer holds I presume (filip)
-##    if (any (v$int < 0) & any (v$int > 0))
-##	    stop("error: the advective velocity cannot be both positive and negative within the same domain")
 
     ## check input of VF
     gn <- names(VF)
@@ -144,12 +140,12 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
     	stop("error: the grid distances dx and dx.aux should always be positive")
 
     ## check input of boundary layer parameters
-    if (!is.null(a.bl.up) & !is.null(C.bl.up)) {
+    if (!is.null(a.bl.up) & !is.null(C.up)) {
     	if (a.bl.up < 0)
         stop("error: the boundary layer transfer coefficient should be positive")
     }
 
-    if (!is.null(a.bl.down) & !is.null(C.bl.down)) {
+    if (!is.null(a.bl.down) & !is.null(C.down)) {
 	    if (a.bl.down < 0)
         stop("error: the boundary layer transfer coefficient should be positive")
     }
@@ -157,8 +153,6 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
 
 
 ### FUNCTION BODY: CALCULATIONS
-
-
   if (full.output) {
     ## Impose boundary flux at upper boundary when needed
     ## Default boundary condition is zero gradient
@@ -198,16 +192,16 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
     }
 
     ## when upstream boundary layer is present, calculate new C.up
-    if (!is.null(a.bl.up) & !is.null(C.bl.up)) {
+    if (!is.null(a.bl.up) & !is.null(C.up)) {
       if (v$int[1] >= 0)	{
         ## advection directed downwards
-        nom <- a.bl.up*C.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
+        nom <- a.bl.up*C.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
               (1-AFDW$int[1])*v$int[1])*C[1]
         denom <- a.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
                  AFDW$int[1]*v$int[1])
 	    } else	{
         ## advection directed upwards
-        nom <- a.bl.up*C.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
+        nom <- a.bl.up*C.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
                AFDW$int[1]*v$int[1])*C[1]
         denom <- a.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
                 (1-AFDW$int[1])*v$int[1])
@@ -216,16 +210,16 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
     }
 
     ## when downstream boundary layer is present, calculate new C.up
-    if (!is.null(a.bl.down) & !is.null(C.bl.down)) {
+    if (!is.null(a.bl.down) & !is.null(C.down)) {
       if (v$int[N+1] >= 0)	{
         ## advection directed downwards
-       nom <- a.bl.down*C.bl.down + VF$int[N+1]*(D$int[N+1]/
+       nom <- a.bl.down*C.down + VF$int[N+1]*(D$int[N+1]/
               grid$dx.aux[N+1] + (1-AFDW$int[N+1])*v$int[N+1])*C[N]
        denom <- a.bl.down + VF$int[N+1]*(D$int[N+1]/grid$dx.aux[N+1] +
                 AFDW$int[N+1]*v$int[N+1])
      	} else	{
         ## advection directed upwards
-        nom <- a.bl.down*C.bl.down + VF$int[N+1]*(D$int[N+1]/
+        nom <- a.bl.down*C.down + VF$int[N+1]*(D$int[N+1]/
                grid$dx.aux[N+1] + AFDW$int[N+1]*v$int[N+1])*C[N]
         denom <- a.bl.down + VF$int[N+1]*(D$int[N+1]/grid$dx.aux[N+1] +
                  (1-AFDW$int[N+1])*v$int[N+1])
@@ -262,14 +256,14 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
   } else { # not full.output
 
     ## when upstream boundary layer is present, calculate new C.up
-    if (!is.null(a.bl.up) & !is.null(C.bl.up))  {
+    if (!is.null(a.bl.up) & !is.null(C.up))  {
       if (v$int[1] >= 0) { # advection directed downwards
-        nom <- a.bl.up*C.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
+        nom <- a.bl.up*C.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
                (1-AFDW$int[1])*v$int[1])*C[1]
         denom <- a.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
                AFDW$int[1]*v$int[1])
 	    } else	{  # advection directed upwards
-        nom <- a.bl.up*C.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
+        nom <- a.bl.up*C.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
                AFDW$int[1]*v$int[1])*C[1]
         denom <- a.bl.up + VF$int[1]*(D$int[1]/grid$dx.aux[1] +
                  (1-AFDW$int[1])*v$int[1])
@@ -278,14 +272,14 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
     }
 
     ## when upstream boundary layer is present, calculate new C.up
-    if (!is.null(a.bl.down) & !is.null(C.bl.down)) {
+    if (!is.null(a.bl.down) & !is.null(C.down)) {
       if (v$int[N+1] >= 0)	{   # advection directed downwards
-        nom <- a.bl.down*C.bl.down + VF$int[N+1]*(D$int[N+1]/
+        nom <- a.bl.down*C.down + VF$int[N+1]*(D$int[N+1]/
                grid$dx.aux[N+1] + (1-AFDW$int[N+1])*v$int[N+1])*C[N]
         denom <- a.bl.down + VF$int[N+1]*(D$int[N+1]/grid$dx.aux[N+1] +
                  AFDW$int[N+1]*v$int[N+1])
 	    } else	{  # advection directed upwards
-        nom <- a.bl.down*C.bl.down + VF$int[N+1]*(D$int[N+1]/
+        nom <- a.bl.down*C.down + VF$int[N+1]*(D$int[N+1]/
                  grid$dx.aux[N+1] + AFDW$int[N+1]*v$int[N+1])*C[N]
         denom <- a.bl.down + VF$int[N+1]*(D$int[N+1]/grid$dx.aux[N+1] +
                 (1-AFDW$int[N+1])*v$int[N+1])

@@ -19,9 +19,9 @@ tran.3D (C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   flux.x.up=NULL, flux.x.down=NULL,
   flux.y.up=NULL, flux.y.down=NULL,
   flux.z.up=NULL, flux.z.down=NULL,
-  a.bl.x.up=NULL, C.bl.x.up=NULL, a.bl.x.down=NULL, C.bl.x.down=NULL,
-  a.bl.y.up=NULL, C.bl.y.up=NULL, a.bl.y.down=NULL, C.bl.y.down=NULL,
-  a.bl.z.up=NULL, C.bl.z.up=NULL, a.bl.z.down=NULL, C.bl.z.down=NULL,
+  a.bl.x.up=NULL, a.bl.x.down=NULL, 
+  a.bl.y.up=NULL, a.bl.y.down=NULL, 
+  a.bl.z.up=NULL, a.bl.z.down=NULL, 
   D.grid=NULL, D.x=NULL, D.y=D.x, D.z=D.x,
   v.grid=NULL, v.x=0, v.y=0, v.z=0,
   AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x, AFDW.z=AFDW.x,
@@ -74,53 +74,35 @@ tran.3D (C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   \item{a.bl.x.up }{transfer coefficient across the upstream boundary layer.
      in x-direction
 
-     \code{Flux=a.bl.x.up*(C.bl.x.up-C[1,,])}. One value [L/T].
-  }
-  \item{C.bl.x.up }{concentration at the upstream boundary layer
-    in x-direction; matrix of dimensions Ny*Nz [M/L3].
+     \code{Flux=a.bl.x.up*(C.x.up-C[1,,])}. One value [L/T].
   }
   \item{a.bl.x.down }{transfer coefficient across the downstream boundary
     layer in x-direction;
 
-    \code{Flux=a.bl.x.down*(C[Nx,,]-C.bl.x.down)}.
+    \code{Flux=a.bl.x.down*(C[Nx,,]-C.x.down)}.
     One value [L/T].
-  }
-  \item{C.bl.x.down }{concentration at the downstream boundary layer
-    in x-direction ; matrix of dimensions Ny*Nz  [M/L3].
   }
   \item{a.bl.y.up }{transfer coefficient across the upstream boundary layer.
      in y-direction
 
-     \code{Flux=a.bl.y.up*(C.bl.y.up-C[,1,])}. One value [L/T].
-  }
-  \item{C.bl.y.up }{concentration at the upstream boundary layer
-    in y-direction; matrix of dimensions Nx*Nz [M/L3].
+     \code{Flux=a.bl.y.up*(C.y.up-C[,1,])}. One value [L/T].
   }
   \item{a.bl.y.down }{transfer coefficient across the downstream boundary
     layer in y-direction;
 
-    \code{Flux=a.bl.y.down*(C[,Ny,]-C.bl.y.down)}.
+    \code{Flux=a.bl.y.down*(C[,Ny,]-C.y.down)}.
     One value [L/T].
-  }
-  \item{C.bl.y.down }{concentration at the downstream boundary layer
-    in y-direction ; matrix of dimensions Nx*Nz  [M/L3].
   }
   \item{a.bl.z.up }{transfer coefficient across the upstream boundary layer.
      in y-direction
 
-     \code{Flux=a.bl.y.up*(C.bl.y.up-C[,,1])}. One value [L/T].
-  }
-  \item{C.bl.z.up }{concentration at the upstream boundary layer
-    in z-direction; matrix of dimensions Nx*Ny [M/L3].
+     \code{Flux=a.bl.y.up*(C.y.up-C[,,1])}. One value [L/T].
   }
   \item{a.bl.z.down }{transfer coefficient across the downstream boundary
     layer in z-direction;
 
-    \code{Flux=a.bl.z.down*(C[,,Nz]-C.bl.z.down)}.
+    \code{Flux=a.bl.z.down*(C[,,Nz]-C.z.down)}.
     One value [L/T].
-  }
-  \item{C.bl.z.down }{concentration at the downstream boundary layer
-    in z-direction ; matrix of dimensions Nx*Ny [M/L3].
   }
   \item{D.grid }{diffusion coefficient defined on all grid cell
     interfaces.
@@ -363,6 +345,13 @@ filled.contour(y[,,n/2],color.palette=terrain.colors)
   This is also the order of priority. The zero gradient is the default,
   the fixed flux overrules all other.
 }  
+\seealso{
+  \code{\link{tran.cylindrical}}, \code{\link{tran.spherical}} 
+   for a discretisation of 3-D transport equations in cylindrical and 
+   spherical coordinates
+  
+  \code{\link{tran.1D}},   \code{\link{tran.2D}}
+}
 
 \keyword{utilities}
 

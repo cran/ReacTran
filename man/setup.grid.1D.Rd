@@ -23,6 +23,7 @@
   (\code{L}), and the number of layers in each zone (\code{N}) as vectors.
   In each zone, one can control the grid resolution near the upstream and
   downstream boundary.
+  
   The grid resolution at the upstream interface changes according to the
   power law relation \code{dx[i+1] = min(max.dx.1,p.dx.1*dx[i])},
   where \code{p.dx.1} determines the rate of increase and \code{max.dx.1}
@@ -30,6 +31,9 @@
 
   A similar formula controls the resolution at the downstream interface.
   This allows refinement of the grid near the interfaces.
+  
+  If only \code{x.up, N} and \code{dx.1} are specified, then the grid size
+  is taken constant = \code{dx.1} (and \code{L=N*dx.1})
 }
 
 \usage{
@@ -159,3 +163,10 @@ plot(GR)
 }
 \keyword{utilities}
 
+\seealso{
+  \code{\link{tran.1D}}, for a discretisation of the general transport equation in 1-D
+
+  \code{\link{setup.grid.2D}} for the creation of grids in 2-D
+
+  \code{\link{setup.prop.1D}}, for defining properties on the 1-D grid.
+}

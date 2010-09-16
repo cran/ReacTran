@@ -108,3 +108,10 @@ lines(grid$x.int,P.linear$int,lty="dotdash")
 
 \keyword{utilities}
 
+\seealso{
+  \code{\link{tran.1D}}, for a discretisation of the general transport equation in 1-D
+
+  \code{\link{setup.grid.1D}}, the creation of grids in 1-D
+
+  \code{\link{setup.prop.2D}} for defining properties on 2-D grids.
+}

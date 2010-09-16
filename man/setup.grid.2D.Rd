@@ -85,3 +85,10 @@ y.grid <- setup.grid.1D(x.up=0,L=20,N=10)
 }
 \keyword{utilities}
 
+\seealso{
+  \code{\link{tran.2D}},  for a discretisation of the general transport equation in 2-D
+
+  \code{\link{setup.grid.1D}}, for the creation of grids in 1-D
+
+  \code{\link{setup.prop.2D}} for defining properties on the 2-D grid.
+}

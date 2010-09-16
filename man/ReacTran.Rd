@@ -28,8 +28,8 @@
   \tabular{ll}{
     Package: \tab ReacTran\cr
     Type: \tab Package\cr
-    Version: \tab 1.1\cr
-    Date: \tab 2009-05-31\cr
+    Version: \tab 1.3\cr
+    Date: \tab 2010-09-01\cr
     License: \tab GNU Public License 2 or above\cr
   }
 }
@@ -42,20 +42,50 @@
 \dontrun{
 
 ## show examples (see respective help pages for details)
+## 1-dimensional transport
 example(tran.1D)
-example(tran.2D)
-example(tran.3D)
 example(tran.volume.1D)
+
+## 2-dimensional transport
+example(tran.2D)
+example(tran.polar)
+
+## 3-dimensional transport
+example(tran.3D)
+example(tran.cylindrical)
+example(tran.spherical)
 
 ## open the directory with documents
 browseURL(paste(system.file(package="ReacTran"), "/doc", sep=""))
 
-## show package vignette with how to use ReacTran
-## + source code of the vignette
+## open the directory with fortran codes of the transport functions
+browseURL(paste(system.file(package="ReacTran"), "/doc/fortran", sep=""))
+
+## show package vignette with how to use ReacTran and how to solve PDEs
+## + source code of the vignettes
 vignette("ReacTran")
+vignette("PDE")
 edit(vignette("ReacTran"))
 
+## a directory with fortran implementations of the transport
+browseURL(paste(system.file(package="ReacTran"), "/doc/fortran", sep=""))
 }
 }
-
 \keyword{ package }
+\seealso{
+  \code{\link{tran.1D}},   \code{\link{tran.2D}},  \code{\link{tran.3D}} for 
+  a discretisation of the general transport equations
+
+  \code{\link{tran.volume.1D}} for discretisation of the 1-D transport equations using finite volumes
+  
+  \code{\link{tran.cylindrical}}, \code{\link{tran.spherical}} 
+   for a discretisation of 3-D transport equations in cylindrical and 
+   spherical coordinates
+
+  \code{\link{tran.polar}}, 
+   for a discretisation of 2-D transport equations in polar coordinates  
+
+  \code{\link{setup.grid.1D}},   \code{\link{setup.grid.2D}} for the creation of grids in 1-D and in 2-D
+
+  \code{\link{setup.prop.1D}},   \code{\link{setup.prop.2D}} for defining properties on these grids.
+}

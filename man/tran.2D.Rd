@@ -13,8 +13,7 @@
 tran.2D ( C, C.x.up=C[1,], C.x.down=C[nrow(C),],
   C.y.up=C[,1], C.y.down=C[,ncol(C)],
   flux.x.up=NULL, flux.x.down=NULL, flux.y.up=NULL, flux.y.down=NULL,
-  a.bl.x.up=NULL, C.bl.x.up=NULL, a.bl.x.down=NULL, C.bl.x.down=NULL,
-  a.bl.y.up=NULL, C.bl.y.up=NULL, a.bl.y.down=NULL, C.bl.y.down=NULL,
+  a.bl.x.up=NULL, a.bl.x.down=NULL, a.bl.y.up=NULL, a.bl.y.down=NULL, 
   D.grid=NULL, D.x=NULL, D.y=D.x,
   v.grid=NULL, v.x=0, v.y=0,
   AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x,
@@ -55,36 +54,24 @@ tran.2D ( C, C.x.up=C[1,], C.x.down=C[nrow(C),],
   \item{a.bl.x.up }{transfer coefficient across the upstream boundary layer.
      in x-direction;
 
-     \code{Flux=a.bl.x.up*(C.bl.x.up-C[1,])}. One value [L/T].
-  }
-  \item{C.bl.x.up }{concentration at the upstream boundary layer
-    in x-direction; vector of length Ny  [M/L3].
+     \code{Flux=a.bl.x.up*(C.x.up-C[1,])}. One value [L/T].
   }
   \item{a.bl.x.down }{transfer coefficient across the downstream boundary
     layer in x-direction;
 
-    \code{Flux=a.bl.x.down*(C[Nx,]-C.bl.x.down)}.
+    \code{Flux=a.bl.x.down*(C[Nx,]-C.x.down)}.
     One value [L/T].
-  }
-  \item{C.bl.x.down }{concentration at the downstream boundary layer
-    in x-direction ; vector of length Ny  [M/L3].
   }
   \item{a.bl.y.up }{transfer coefficient across the upstream boundary layer.
      in y-direction;
 
-     \code{Flux=a.bl.y.up*(C.bl.y.up-C[,1])}. One value [L/T].
-  }
-  \item{C.bl.y.up }{concentration at the upstream boundary layer
-    in y-direction; vector of length Nx  [M/L3].
+     \code{Flux=a.bl.y.up*(C.y.up-C[,1])}. One value [L/T].
   }
   \item{a.bl.y.down }{transfer coefficient across the downstream boundary
     layer in y-direction;
 
-    \code{Flux=a.bl.y.down*(C[,Ny]-C.bl.y.down)}.
+    \code{Flux=a.bl.y.down*(C[,Ny]-C.y.down)}.
     One value [L/T].
-  }
-  \item{C.bl.y.down }{concentration at the downstream boundary layer
-    in y-direction ; vector of length Nx  [M/L3].
   }
   \item{D.grid }{diffusion coefficient defined on all grid cell
     interfaces. A \code{prop.2D} list created by \code{\link{setup.prop.2D}} [L2/T].
@@ -221,6 +208,21 @@ tran.2D ( C, C.x.up=C[1,], C.x.down=C[nrow(C),],
   Karline Soetaert <k.soetaert@nioo.knaw.nl>
 }
 
+\note{
+  It is much more efficient to use the \emph{grid} input rather than 
+  vectors or single numbers. 
+  
+  Thus: to optimise the code, use \link{setup.grid.2D} to create the 
+  \code{grid}, and use \link{setup.prop.2D} to create \code{D.grid},
+  \code{v.grid}, \code{AFDW.grid}, \code{VF.grid}, and \code{A.grid},
+  even if the values are 1 or remain constant.
+  
+  There is no provision (yet) to deal with \emph{cross-diffusion}. 
+  Set \code{D.x} and \code{D.y} different only if cross-diffusion effects
+  are unimportant. 
+  
+}
+
 \examples{
 ## =============================================================================
 ## Testing the functions
@@ -278,12 +280,12 @@ tran.2D(C=C, D.x=D, v.x=0, VF.x=por, dx=dx, dy=dy,
 # Boundary conditions: convective boundary layer on all sides
 
 a.bl <- 800   # transfer coefficient
-C.bl.x.up <- rep(1, times=(y.N)) # fixed conc at boundary layer
-C.bl.y.up <- rep(1, times=(x.N)) # fixed conc at boundary layer
+C.x.up <- rep(1, times=(y.N)) # fixed conc at boundary layer
+C.y.up <- rep(1, times=(x.N)) # fixed conc at boundary layer
 tran.2D(full.output=TRUE, C=C, D.x=D, v.x=0, VF.x=por,
-  dx=dx, dy=dy, C.bl.x.up=C.bl.x.up, a.bl.x.up=a.bl, C.bl.x.down=C.bl.x.up,
-  a.bl.x.down=a.bl, C.bl.y.up=C.bl.y.up, a.bl.y.up=a.bl,
-  C.bl.y.down=C.bl.y.up, a.bl.y.down=a.bl)
+  dx=dx, dy=dy, C.x.up=C.x.up, a.bl.x.up=a.bl, C.x.down=C.x.up,
+  a.bl.x.down=a.bl, C.y.up=C.y.up, a.bl.y.up=a.bl,
+  C.y.down=C.y.up, a.bl.y.down=a.bl)
 
 # Runtime test with and without argument checking
 
@@ -293,7 +295,7 @@ test1 <- function()
 {
 for (i in 1:n.iterate )
 ST<-tran.2D(full.check=TRUE,C=C,D.x=D,v.x=0,VF.x=por,
-dx=dx,dy=dy,C.bl.x.up=C.bl.x.up,a.bl.x.up=a.bl,C.x.down=C.x.down)
+dx=dx,dy=dy,C.x.up=C.x.up,a.bl.x.up=a.bl,C.x.down=C.x.down)
 } 
 system.time(test1())
 
@@ -301,7 +303,7 @@ test2 <- function()
 {
 for (i in 1:n.iterate )
 ST<-tran.2D(full.output=TRUE,C=C,D.x=D,v.x=0,VF.x=por,
-dx=dx,dy=dy,C.bl.x.up=C.bl.x.up,a.bl.x.up=a.bl,C.x.down=C.x.down)
+dx=dx,dy=dy,C.x.up=C.x.up,a.bl.x.up=a.bl,C.x.down=C.x.down)
 } 
 system.time(test2())
 
@@ -309,13 +311,13 @@ test3 <- function()
 {
 for (i in 1:n.iterate )
 ST<-tran.2D(full.output=TRUE,full.check=TRUE,C=C,D.x=D,v.x=0,
-VF.x=por,dx=dx,dy=dy,C.bl.x.up=C.bl.x.up,a.bl.x.up=a.bl,C.x.down=C.x.down)
+VF.x=por,dx=dx,dy=dy,C.x.up=C.x.up,a.bl.x.up=a.bl,C.x.down=C.x.down)
 } 
 system.time(test3())
 
 ## =============================================================================
 ## A 2-D model with diffusion in x- and y direction and first-order
-## consumption
+## consumption - unefficient implementation
 ## =============================================================================
 
 N     <- 51          # number of grid cells
@@ -362,8 +364,48 @@ legend ("bottom", col=c("red","black"), lty=c(1,NA), pch=c(NA,"+"),
         c("tran.2D","exact"))
 par("mfrow"=pm )
 
+
+
+## =============================================================================
+## A 2-D model with diffusion in x- and y direction and first-order
+## consumption - more efficient implementation, specifying ALL 2-D grids
+## =============================================================================
+
+N     <- 51          # number of grid cells
+Dy    <- Dx <- 0.1   # diffusion coeff, X- and Y-direction
+r     <- 0.005       # consumption rate
+ini   <- 1           # initial value at x=0
+
+x.grid    <- setup.grid.1D(x.up=-5,x.down=5,N=N)
+y.grid    <- setup.grid.1D(x.up=-5,x.down=5,N=N)
+grid2D    <- setup.grid.2D(x.grid,y.grid)
+
+D.grid    <- setup.prop.2D(value = Dx, y.value = Dy, grid=grid2D)
+v.grid    <- setup.prop.2D(value = 0, grid=grid2D)
+A.grid    <- setup.prop.2D(value = 1, grid=grid2D)
+AFDW.grid <- setup.prop.2D(value = 1, grid=grid2D)
+VF.grid   <- setup.prop.2D(value = 1, grid=grid2D)
+
+# The model equations - using the grids
+
+Diff2Db <- function (t,y,parms)  {
+   CONC  <- matrix(nr=N,nc=N,y)
+   dCONC <- tran.2D(CONC, grid = grid2D, D.grid=D.grid, 
+      A.grid=A.grid, VF.grid=VF.grid, AFDW.grid = AFDW.grid, 
+      v.grid=v.grid)$dC + r * CONC
+  
+  return (list(as.vector(dCONC)))
 }
 
+# initial condition: 0 everywhere, except in central point
+y <- matrix(nr=N,nc=N,data=0)
+y[N2,N2] <- ini  # initial concentration in the central point...
+
+# solve for 10 time units
+times <- 0:10
+outb <- ode.2D (y=y, func=Diff2Db, t=times, parms=NULL,
+                dim = c(N,N), lrw = 160000)
+}
 \references{
   Soetaert and Herman, 2009. a practical guide to ecological modelling -
   using R as a simulation platform. Springer
@@ -381,5 +423,11 @@ par("mfrow"=pm )
   the fixed flux overrules all other.
 }  
 
-\keyword{utilities}
 
+\seealso{
+  \code{\link{tran.polar}} for a discretisation of 2-D transport equations 
+  in polar coordinates
+  
+  \code{\link{tran.1D}},   \code{\link{tran.3D}}
+}
+\keyword{utilities}

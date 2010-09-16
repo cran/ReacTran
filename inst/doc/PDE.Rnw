@@ -1,0 +1,524 @@
+\documentclass[article,nojss]{jss}
+\DeclareGraphicsExtensions{.pdf,.eps,.jpeg}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add-on packages and fonts
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\newcommand{\noun}[1]{\textsc{#1}}
+%% Bold symbol macro for standard LaTeX users
+\providecommand{\boldsymbol}[1]{\mbox{\boldmath $#1$}}
+
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+\usepackage{array} % tabel commands
+\setlength{\extrarowheight}{0.1cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\newcommand{\rt}{\textbf{\textsf{ReacTran }}}
+\newcommand{\rs}{\textbf{\textsf{rootSolve }}}
+\newcommand{\R}{\proglang{R }}
+\newcommand{\ds}{\textbf{\textsf{deSolve }}}
+\newcommand{\dd}{\textbf{\textsf{ddesolve }}}
+\newcommand{\rb}[1]{\raisebox{1.5ex}{#1}}
+
+\title{Solving partial differential equations, using  \R package \rt}
+\Plaintitle{Solving partial differential equations using R package ReacTran}
+
+\Keywords{Partial Differential Equations, hyperbolic, parabolic, 
+  elliptic, \R}
+
+\Plainkeywords{Partial Differential Equations, hyperbolic, parabolic, 
+  elliptic, R}
+
+
+\author{Karline Soetaert and Filip Meysman\\
+Centre for Estuarine and Marine Ecology\\
+Netherlands Institute of Ecology\\
+The Netherlands
+}
+
+\Plainauthor{Karline Soetaert and Filip Meysman}
+
+\Abstract{
+  \R-package \rt \citep{ReacTran} contains functions to solve reactive-transport equations, as used e.g. in the environmental sciences. 
+  
+  Essentially, it 
+\begin{enumerate}
+  \item Provides functions that subdivide the spatial extent into a number of discrete grid cells. 
+  \item Approximates the advective-diffusive transport term by finite differences or finite volumes. 
+\end{enumerate}  
+  The main package vignette \citep{ReacTran-vignette} explains how \rt can be used to model reaction-transport phenomena.
+  
+  However, the functions from \rt can be use to solve more general types of partial differential equations ($\leq$ order 2).
+  
+  In this vignette, show how the package can be used to solve partial differential equations of the parabolic, hyperbolic and elliptic type, providing one example each.
+}
+
+%% The address of (at least) one author should be given
+%% in the following format:
+\Address{
+  Karline Soetaert\\
+  Centre for Estuarine and Marine Ecology (CEME)\\
+  Netherlands Institute of Ecology (NIOO)\\
+  4401 NT Yerseke, Netherlands\\
+  E-mail: \email{k.soetaert@nioo.knaw.nl}\\
+  URL: \url{http://www.nioo.knaw.nl/ppages/ksoetaert}\\
+  \\
+  Filip Meysman\\
+  Centre for Estuarine and Marine Ecology (CEME)\\
+  Netherlands Institute of Ecology (NIOO)\\
+  4401 NT Yerseke, Netherlands\\
+  E-mail: \email{f.meysman@nioo.knaw.nl}\\
+  URL: \url{http://www.nioo.knaw.nl/ppages/fmeysman}\\
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% R/Sweave specific LaTeX commands.
+%% need no \usepackage{Sweave}
+%\VignetteIndexEntry{Solving parabolic, hyperbolic and elliptic partial differential equations in R}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Begin of the document
+\begin{document}
+\SweaveOpts{engine=R,eps=FALSE}
+\SweaveOpts{keep.source=TRUE}
+<<preliminaries,echo=FALSE,results=hide>>=
+library(ReacTran)
+options(prompt = " ")
+@
+
+\maketitle
+
+\section{Partial differential equations}
+In \textbf{partial differential equations }(PDE), the function has several
+independent variables (e.g. time and depth) and contains their partial
+derivatives.
+
+A first step to solve partial differential equations (PDE), is to discretise one or more of the independent variables. 
+
+Usually, the independent variable ``time'' is not discretised, while other variables (e.g. spatial axes) are discetised, so that a set of ODE is obtained, which can be solved with appropriate initial values solvers from package \ds \citep{deSolve}.
+This technique, the method-of-lines, applies to hyperbolic and parabolic PDEs.
+
+For time-invariant problems, usually all independent variables are discretised, and the resulting algebraic equations solved with root-solving functions from package \rs
+\citep{rootSolve}.
+
+Functions \code{tran.1D}, \code{tran.2D}, and \code{tran.3D} from 
+\R package \pkg{ReacTran} implement finite difference approximations of the 
+general diffusive-advective transport equation, which for 1-D is:
+  
+\begin{eqnarray*}
+   -\frac{1}{A_x \xi_x}\cdot (\frac{\partial}{\partial x}
+       A_x \cdot (-  D  \cdot \frac{\partial \xi_x C}{\partial x}) 
+        - \frac{\partial}{\partial x}
+       (A_x \cdot v  \cdot \xi_x C))   
+\end{eqnarray*}
+Here $D$ is the "diffusion coefficient", $v$ is the "advection rate", and $A_x$ and $\xi$ are the surface area and volume fraction respectively.
+
+Assuming that $A$, $\xi$, $D$ and $v$ are constant along $x$, we can rewrite this in a more general form:
+\begin{eqnarray*}
+   D \frac{\partial^2C}{\partial x^2} - u \frac{\partial C}{\partial x}
+\end{eqnarray*}
+
+In which the first term is a second-order, the second term a first-order derivative.
+
+\R-function \code{tran.1D} is defined as (simplified):
+\begin{verbatim}
+tran.1D <- function (C, C.up = C[1], C.down = C[length(C)], flux.up = NULL,                 
+     flux.down = NULL, a.bl.up = NULL, a.bl.down = NULL, D = 0,                   
+     v = 0, AFDW = 1, VF = 1, A = 1, dx, ...)
+\end{verbatim}
+
+where \code{C.up} and \code{C.down} are the upstream and downstream boundary values, \code{flux.up} and \code{flux.down} are the upstream and downstream fluxes, \code{v} and \code{D} are the advection and diffusion coefficient respectively, \code{A} is the surface area, \code{x} contains the grid, and \code{VF} is the volume fraction ($\xi$). 
+For the other arguments, see the help file of \code{tran.1D}.
+
+A suitable \emph{grid} can be generated with functions \code{setup.grid.1D} and
+\code{setup.grid.2D} (there is no corresponding 3D function), while a \emph{property} can be added to this grid using functions \code{setup.prop.1D}, and \code{setup.prop.2D}. 
+These latter two functions are useful to have the variable surface areas, volume fractions, advection and diffusion rates being defined at the correct places of the grid.
+
+These functions are defined as (simplified):
+\begin{verbatim}
+setup.grid.1D <- function(x.up = 0, x.down = NULL, L = NULL, N = NULL, 
+      dx.1 = NULL, ...)
+
+setup.grid.2D <- function(x.grid = NULL, y.grid = NULL)
+
+setup.prop.1D <- function (func = NULL, value = NULL, xy = NULL, 
+      interpolate = "spline", grid, ...) 
+
+setup.prop.2D <- function (func = NULL, value = NULL, grid, y.func = func, 
+      y.value = value, ...)   
+\end{verbatim}
+
+\clearpage
+\section{A parabolic PDE}
+As an example of the parabolic type, consider the 1-D diffusion-reaction model, in spherical,
+cylindrical and cartesian coordinates, defined for $r$ in $[0, 10]$:
+
+\begin{eqnarray*}
+  \frac{\partial C}{\partial t} &=& \frac{1}{r^2}\cdot \frac{\partial}{\partial r}
+    \left(r^2 \cdot D  \cdot \frac{\partial C}{\partial r}\right)  - Q \\
+  \frac{\partial C}{\partial t} &=& \frac{1}{r}\cdot \frac{\partial}{\partial r}
+    \left(r \cdot D  \cdot \frac{\partial C}{\partial r}\right)  - Q \\
+  \frac{\partial C}{\partial t} &=& \frac{\partial}{\partial r}
+    \left(D  \cdot \frac{\partial C}{\partial r}\right)  - Q
+\end{eqnarray*}
+
+with $t$ the time, $r$ the (radial) distance from the origin,
+$Q$, the consumption rate, and with boundary conditions
+(values at the model edges):
+
+\begin{eqnarray*}
+  \frac{\partial C}{\partial r}_{r=0} &=& 0 \\
+  C_{r=10} &=& Cext
+\end{eqnarray*}
+
+To solve this model in \R{}, first the 1-D model \code{Grid} is
+defined; it divides 10 cm (\code{L}) into 1000 equally-sized boxes (\code{N}).
+
+<<>>=
+Grid <- setup.grid.1D(N = 1000, L = 10)
+@
+
+Next the properties $r$ and $r^2$ are defined on this grid:
+\SweaveOpts{keep.source=TRUE}
+
+<<>>=
+r  <- setup.prop.1D(grid = Grid, func = function(r) r)
+r2 <- setup.prop.1D(grid = Grid, func = function(r) r^2)
+@
+\SweaveOpts{keep.source=FALSE}
+
+The model equation includes a transport term, approximated by
+\pkg{ReacTran} function \code{tran.1D} and a consumption term
+(\code{Q}); only the downstream boundary condition, prescribed as a
+concentration (\code{C.down}) needs to be specified, as the
+zero-gradient at the upstream boundary is the default:
+
+<<>>=
+library(ReacTran)
+pde1D <-function(t, C, parms, A = 1)  {
+  tran   <- tran.1D (C = C, A = A, D = D, C.down = Cext, dx = Grid)$dC
+  list(tran - Q)  # the return value: rate of change
+}
+@
+
+The model parameters are defined:
+
+<<>>=
+D    <- 1    # diffusion constant
+Q    <- 1    # uptake rate
+Cext <- 20
+@
+\subsection{Steady-state solution}
+In a first application, the model is solved to \emph{steady-state},
+which retrieves the condition where the concentrations are invariant,
+e.g.  for the cylindrical coordinate case:
+
+\[
+ 0 = \frac{1}{r^2}\cdot \frac{\partial}{\partial r}
+       \left(r^2 \cdot D  \cdot \frac{\partial C}{\partial r}\right)  - Q
+\]
+
+In \R, steady-state conditions can be estimated using functions from
+package \rs which implement  amongst others a Newton-Raphson algorithm
+\citep{Press92}.  For 1-dimensional models, \code{steady.1D} should be
+used.  The initial ``guess'' of the steady-state solution (\code{y})
+is unimportant; here we take simply \code{N} random
+numbers. Argument \code{nspec = 1} informs the solver that only one component
+is described.
+
+Although a system of 1000 equations needs to be solved, this takes only a
+fraction of a second:
+
+\SweaveOpts{keep.source=TRUE}
+
+<<>>=
+library(rootSolve)
+Cartesian   <- steady.1D(y = runif(Grid$N),
+  func = pde1D, parms = NULL, nspec = 1, A = 1)
+Cylindrical <- steady.1D(y = runif(Grid$N),
+  func = pde1D, parms = NULL, nspec = 1, A = r)
+@
+<<>>=
+print(system.time(
+  Spherical   <- steady.1D(y = runif(Grid$N),
+    func = pde1D, parms = NULL, nspec = 1, A = r2)
+))
+@
+
+The values of the state-variables (\code{y}) are plotted against the
+radial distance, in the middle of the grid cells (\code{Grid\$x.mid}).
+
+<<label=pde, include=FALSE>>=
+plot (Grid$x.mid, Cartesian$y, type = "l", main = "steady-state PDE",
+  lwd = 3, xlab = "x", ylab = "C", col = "darkgreen", lty = 1)
+lines(Grid$x.mid, Cylindrical$y, lwd = 3, col="blue", lty = 2)
+lines(Grid$x.mid, Spherical$y, lwd = 3, col = "red", lty = 3)
+legend("bottomright", c("cartesian", "cylindrical", "spherical"),
+  col = c("darkgreen", "blue", "red"), lwd = 3, lty = 1:3)
+@
+
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{figure}
+\begin{center}
+<<label=figpde, fig=TRUE, echo=FALSE>>=
+<<pde>>
+@
+\end{center}
+\caption{Steady-state solution of the 1-D diffusion-reaction model}
+\label{fig:pde}
+\end{figure}
+
+The analytical solutions compare well with the numerical approximation
+for all three cases:
+\SweaveOpts{keep.source=TRUE}
+
+<<>>=
+max(abs(Q/6/D*(r2$mid - 10^2) + Cext - Spherical$y))
+max(abs(Q/4/D*(r2$mid - 10^2) + Cext - Cylindrical$y))
+max(abs(Q/2/D*(r2$mid - 10^2) + Cext - Cartesian$y))
+@
+Note that there is no automatic error checking/control here, so to reduce this error, the number of boxes can be increased.
+\subsection{The method of lines}
+Next the model (for spherical coordinates) is run dynamically for 100
+time units using \ds function \code{ode.1D}, and starting with an initially uniform distribution (\code{y = rep(1, Grid$N)}):
+
+<<>>=
+require(deSolve)
+times <- seq(0, 100, by = 1)
+system.time(
+  out <- ode.1D(y = rep(1, Grid$N), times = times, func = pde1D,
+    parms = NULL, nspec = 1, A = r2)
+)
+@
+
+Here, \code{out} is a matrix, whose $1^{st}$ column contains the
+output times, and the next columns the values of the state variables
+in the different boxes:
+
+<<>>=
+tail(out[, 1:4], n = 3)
+@
+
+We plot the result using a blue-yellow-red color scheme, and using deSolve's
+S3 method \code{image}:
+
+<<label=yy, include=FALSE>>=
+image(out, grid = Grid$x.mid, xlab = "time, days", 
+     ylab = "Distance, cm", main = "PDE", add.contour = TRUE)
+@
+
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{figure}
+%%<<label = yyfig, fig=TRUE, echo=FALSE>>=
+%%<<yy>>
+%%@
+\begin{center}
+\includegraphics{diffusion.jpeg} % to make it smaller
+\end{center}
+\caption{Dynamic solution of the 1-D diffusion-reaction model}
+\label{fig:yy}
+\end{figure}
+
+\clearpage
+\section{A hyperbolic PDE}
+The equation for a wave travelling in one direction ($x$) is given by:
+\begin{align}
+\frac{\partial^2 u}{\partial t^2} &= c^2 \frac{\partial^2 u}{\partial x^2}
+\end{align}
+where $c$ is the propagation speed of the wave, and $u$ is the
+variable that changes as the wave passes. This equation is
+second-order in both $t$ and $x$.
+The wave equation is the prototype of a ``hyperbolic'' partial
+differential equation.
+
+For it to be solved in \R, the equation is rewritten as two coupled
+equations, first-order in time:
+\begin{align}
+\frac{\partial u_1}{\partial t} &= u_2\\
+\frac{\partial u_2}{\partial t} &= c^2 \frac{\partial^2 u_1}{\partial x^2}
+\end{align}
+We solve the equation with the following initial and boundary conditions:
+\begin{align*}
+    u_1(0,x) &= \exp ^{-0.05 x^2}\\
+    u_2(0,x) &= 0\\
+    u_{t,-\infty} &= 0\\
+    u_{t,\infty} &= 0
+   \label{wavecond}
+\end{align*}
+where the first condition represents a Gaussian pulse.
+
+The implementation in \R starts with defining the box size \code{dx}
+and the grid, \code{xgrid}.  To comply with the boundary conditions (which
+are defined at $\infty$), the grid needs to be taken large enough such
+that $u$ remains effectively $0$ at the boundaries, for all run times.
+
+Here, the grid extends from -100 to 100:
+<<>>=
+dx    <- 0.2
+xgrid <- setup.grid.1D(-100, 100, dx.1 = dx)
+x     <- xgrid$x.mid
+N     <- xgrid$N
+@
+The initial condition, \code{yini} and output \code{times} are defined next:
+<<>>=
+uini  <- exp(-0.05 * x^2)
+vini  <- rep(0, N)
+yini  <- c(uini, vini)
+times <- seq (from = 0, to = 50, by = 1)
+@
+The wave equation derivative function first extracts, from state variable vector
+\code{y} the two properties \code{u1, u2}, both of length \code{N},
+after which \pkg{ReacTran} function \code{tran.1D} performs transport
+of \code{u1}. The squared velocity ($c^2$) is taken as 1 (\code{D=1}):
+
+<<>>=
+wave <- function (t, y, parms) {
+  u1 <- y[1:N]
+  u2 <- y[-(1:N)]
+
+  du1 <- u2
+  du2 <- tran.1D(C = u1, C.up = 0, C.down = 0, D = 1, dx = xgrid)$dC
+  return(list(c(du1, du2)))
+}
+@
+
+The wave equation can be solved efficiently with a non-stiff solver
+such as the Runge-Kutta method \code{ode45}.
+<<>>=
+out <- ode.1D(func = wave, y = yini, times = times, parms = NULL,
+         nspec = 2, method = "ode45", dimens = N, names = c("u", "v"))
+@
+
+We now plot the results (Fig. \ref{fig:wave}); intial condition in
+black, the values for selected time points in \code{darkgrey}; a
+\code{legend} with times is written.
+
+<<label=wave,include=FALSE>>=
+u <- out[  ,2:(N+1)]
+
+plot(x, u[1,], xlab = "x", ylab = "u", type = "l", lwd = 2, 
+     ylim = range(u), xlim = range(-50, 50))
+
+iout <- seq(11, length(times), by=10)
+for(i in iout)
+  lines(x, u[i,], lwd = 2, col = "darkgrey", lty = i/10)
+
+legend("topright", lty = 1:5, lwd = 2, col = "darkgrey", 
+       legend=paste("t = ", times[iout]))
+@
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{figure}[h]
+\begin{center}
+<<label=wave,fig=TRUE,echo=FALSE,height=5>>=
+<<wave>>
+@
+\end{center}
+\caption{The 1-D wave equation; black = initial condition; grey: several time
+lines}
+\label{fig:wave}
+\end{figure}
+
+S3-method \code{image} can also be used to generate \code{persp}-like plots:
+
+<<label=waveimg,include=FALSE>>=
+par(mar=c(0,0,0,0))
+image(out, which = "u", method = "persp", main = "",
+        border = NA, col = "lightblue", box = FALSE, shade = 0.5, theta = 0, 
+        phi = 60)
+@
+% note: load stored - persp
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{figure}[h]
+\begin{center}
+\includegraphics{perspwave.jpeg}
+\end{center}
+\caption{The 1-D wave equation as a persp plot}
+\label{fig:waveimg}
+\end{figure}
+
+You may also want to try the following "movie":
+\begin{verbatim}
+plot.1D(out, grid = x, which = "u", type = "l",
+        lwd = 2, ylim = c(0,1), ask = TRUE)
+\end{verbatim}
+
+\clearpage
+\section{An elliptic PDE}
+
+The final example describes again a diffusion-reaction system with
+production $p$, consumption $r C$, and diffusive transport (diffusion coefficients $Dx, Dy$) of a substance $C$ in 2 dimensions $(x, y)$; the
+boundaries are prescribed as zero-gradient (the default).
+
+\begin{equation}
+    \frac{\partial C}{\partial t} = \frac{\partial}{\partial x}
+       [D_x  \cdot \frac{\partial C}{\partial x} ] +
+       \frac{\partial} {\partial y}
+       [D_y  \cdot \frac{\partial C}{\partial y}]
+       - r C + p_{xy}
+\label{eq:tran}
+\end{equation}
+The parameter $p_{xy}$ is the production rate, which is zero everywhere
+except for 50 randomly positioned spots where it is $1$.
+
+Transport is performed by \code{ReacTran} function \code{tran.2D}; the
+state variable vector (\code{y}) is recast in matrix form
+(\code{CONC}) before it is transported. The first-order consumption
+rate \code{-r * CONC} is added to the rate of change due to transport
+(\code{Tran\$dC}).  Production, \code{p} is added to 50 cells indexed by
+\code{ii}, and which are randomly selected from the grid.
+The function returns a list, containing the derivatives, as a vector:
+<<>>=
+require(ReacTran)
+pde2D <- function (t, y, parms) {
+  CONC <- matrix(nr = n, nc = n, y)
+  Tran <- tran.2D(CONC, D.x = Dx, D.y = Dy, dx = dx,  dy = dy)
+  dCONC <- Tran$dC - r * CONC
+  dCONC[ii]<- dCONC[ii] + p
+  return(list(as.vector(dCONC)))
+}
+@
+Before running the model, the grid sizes (\code{dx, dx}), diffusion
+coefficients (\code{Dx, Dy}), $1^{st}$ order consumption rate (\code{r})
+are defined. There
+are 100 boxes in \code{x}- and \code{y} direction (\code{n}).
+Furthermore, we assume that the substance is produced in 50 randomly
+chosen cells (\code{ii}) at a constant rate (\code{p}):
+\SweaveOpts{keep.source=FALSE}
+<<>>=
+n  <- 100
+dy <- dx <- 1
+Dy <- Dx <- 2
+r  <- 0.001
+p  <- runif(50)
+ii <- trunc(cbind(runif(50)*n, runif(50)*n) + 1)
+@
+The steady-state is found using \rs's function \code{steady.2D}.  It
+takes as arguments amongst other the dimensionality of the problem
+(\code{dimens}) and the length of the work array needed by the solver
+(\code{lrw = 600000}).  It takes less than 0.5 seconds to solve this
+10000 state variable model.
+
+<<>>=
+require(rootSolve)
+Conc0 <- matrix(nr = n, nc = n, 10.)
+print(system.time(
+  ST <- steady.2D(y = Conc0, func = pde2D, parms = NULL, dimens = c(n, n),
+   lrw = 600000)
+))
+@
+<<label=D2, include=FALSE, keep.source=TRUE>>=
+image(ST, main = "steady-state 2-D PDE")
+@
+
+\setkeys{Gin}{width=1.0\textwidth}
+\begin{figure}
+<<label=D2fig, fig=TRUE, echo=FALSE>>=
+<<D2>>
+@
+\caption{Steady-state solution of the 2-D diffusion-reaction model}
+\label{fig:D2}
+\end{figure}
+
+\bibliography{bibs}
+
+\end{document}

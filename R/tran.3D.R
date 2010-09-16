@@ -64,9 +64,9 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   flux.x.up=NULL, flux.x.down=NULL,
   flux.y.up=NULL, flux.y.down=NULL,
   flux.z.up=NULL, flux.z.down=NULL,
-  a.bl.x.up=NULL, C.bl.x.up=NULL, a.bl.x.down=NULL, C.bl.x.down=NULL,
-  a.bl.y.up=NULL, C.bl.y.up=NULL, a.bl.y.down=NULL, C.bl.y.down=NULL,
-  a.bl.z.up=NULL, C.bl.z.up=NULL, a.bl.z.down=NULL, C.bl.z.down=NULL,
+  a.bl.x.up=NULL, a.bl.x.down=NULL, 
+  a.bl.y.up=NULL, a.bl.y.down=NULL, 
+  a.bl.z.up=NULL, a.bl.z.down=NULL, 
   D.grid=NULL, D.x=NULL, D.y=D.x, D.z=D.x,
   v.grid=NULL, v.x=0, v.y=0, v.z=0,
   AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x, AFDW.z=AFDW.x,
@@ -256,32 +256,6 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
       if (!((length(C.z.down)==1) || (sum(abs(dim(C.z.down) - c(Nx,Ny)))==0)))
         stop("error: C.z.down should be of length 1 or a matrix with dim Nx, Ny")
     }
-#
-    if (!is.null(C.bl.x.up)) {
-      if (!((length(C.bl.x.up)==1) || (sum(abs(dim(C.bl.x.up) - c(Ny,Nz)))==0)))
-        stop("error: C.bl.x.up should be of length 1 or a matrix with dim Ny, Nz")
-    }
-    if (!is.null(C.bl.x.down)) {
-      if (!((length(C.bl.x.down)==1) || (sum(abs(dim(C.bl.x.down) - c(Ny,Nz)))==0)))
-        stop("error: C.bl.x.down should be of length 1 or a matrix with dim Ny, Nz")
-    }
-    if (!is.null(C.bl.y.up)) {
-      if (!((length(C.bl.y.up)==1) || (sum(abs(dim(C.bl.y.up) - c(Nx,Nz)))==0)))
-        stop("error: C.bl.y.up should be of length 1 or a matrix with dim Nx, Nz")
-    }
-    if (!is.null(C.bl.y.down)) {
-      if (!((length(C.bl.y.down)==1) || (sum(abs(dim(C.bl.y.down) - c(Nx,Nz)))==0)))
-        stop("error: C.bl.y.down should be of length 1 or a matrix with dim Nx, Nz")
-    }
-    if (!is.null(C.bl.z.up)) {
-      if (!((length(C.bl.z.up)==1) || (sum(abs(dim(C.bl.z.up) - c(Nx,Ny)))==0)))
-        stop("error: C.bl.z.up should be of length 1 or a matrix with dim Nx, Ny")
-    }
-    if (!is.null(C.bl.z.down)) {
-      if (!((length(C.bl.z.down)==1) || (sum(abs(dim(C.bl.z.down) - c(Nx,Ny)))==0)))
-        stop("error: C.bl.z.down should be of length 1 or a matrix with dim Nx, Ny")
-    }
-
 
 # check dimensions of input fluxes
     if (!is.null(flux.x.up)) {
@@ -517,8 +491,8 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   }
 
 ## when upper boundary layer is present, calculate new C.x.up
-  if (!is.null(a.bl.x.up[1]) & !is.null(C.bl.x.up[1])) {
-	  nom <- a.bl.x.up*C.bl.x.up + VF.grid$x.int[1,,]*(D.grid$x.int[1,,]/
+  if (!is.null(a.bl.x.up[1]) & !is.null(C.x.up[1])) {
+	  nom <- a.bl.x.up*C.x.up + VF.grid$x.int[1,,]*(D.grid$x.int[1,,]/
            grid$dx.aux[1] + (1-AFDW.grid$x.int[1,,])*v.grid$x.int[1,,])*C[1,,]
     denom <- a.bl.x.up + VF.grid$x.int[1,,]*(D.grid$x.int[1,,]/grid$dx.aux[1]+
              AFDW.grid$x.int[1,,]*v.grid$x.int[1,,])
@@ -526,8 +500,8 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   }
 
 ## when lower boundary layer is present, calculate new C.x.down
-  if (!is.null(a.bl.x.down[1]) & !is.null(C.bl.x.down[1])) {
-	  nom <- a.bl.x.down*C.bl.x.down + VF.grid$x.int[(Nx+1),,]*(D.grid$x.int[(Nx+1),,]/
+  if (!is.null(a.bl.x.down[1]) & !is.null(C.x.down[1])) {
+	  nom <- a.bl.x.down*C.x.down + VF.grid$x.int[(Nx+1),,]*(D.grid$x.int[(Nx+1),,]/
            grid$dx.aux[(Nx+1)] + (1-AFDW.grid$x.int[(Nx+1),,])*
            v.grid$x.int[(Nx+1),,])*C[Nx,,]
     denom <- a.bl.x.down + VF.grid$x.int[(Nx+1),,]*(D.grid$x.int[(Nx+1),,]/
@@ -536,8 +510,8 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   }
 
 ## when upper y boundary layer is present, calculate new C.y.up
-  if (!is.null(a.bl.y.up[1]) & !is.null(C.bl.y.up[1])) {
-	  nom <- a.bl.y.up*C.bl.y.up + VF.grid$y.int[,1,]*(D.grid$y.int[,1,]/
+  if (!is.null(a.bl.y.up[1]) & !is.null(C.y.up[1])) {
+	  nom <- a.bl.y.up*C.y.up + VF.grid$y.int[,1,]*(D.grid$y.int[,1,]/
            grid$dy.aux[1] + (1-AFDW.grid$y.int[,1,])*v.grid$y.int[,1,])*C[,1,]
     denom <- a.bl.y.up + VF.grid$y.int[,1,]*(D.grid$y.int[,1,]/grid$dy.aux[1]+
              AFDW.grid$y.int[,1,]*v.grid$y.int[,1,])
@@ -545,8 +519,8 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   }
 
 ## when lower y boundary layer is present, calculate new C.y.down
-  if (!is.null(a.bl.y.down[1]) & !is.null(C.bl.y.down[1]))   {
-	  nom <- a.bl.y.down*C.bl.y.down + VF.grid$y.int[,(Ny+1),]*
+  if (!is.null(a.bl.y.down[1]) & !is.null(C.y.down[1]))   {
+	  nom <- a.bl.y.down*C.y.down + VF.grid$y.int[,(Ny+1),]*
            (D.grid$y.int[,(Ny+1),]/grid$dy.aux[(Ny+1)] +
            (1-AFDW.grid$y.int[,(Ny+1),])*v.grid$y.int[,(Ny+1),])*C[,Ny,]
     denom <- a.bl.y.down + VF.grid$y.int[,(Ny+1),]*(D.grid$y.int[,(Ny+1),]/
@@ -555,8 +529,8 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   }
 
 ## when upper z boundary layer is present, calculate new C.z.up
-  if (!is.null(a.bl.z.up[1]) & !is.null(C.bl.z.up[1])) {
-	  nom <- a.bl.z.up*C.bl.z.up + VF.grid$z.int[,1,]*(D.grid$z.int[,1,]/
+  if (!is.null(a.bl.z.up[1]) & !is.null(C.z.up[1])) {
+	  nom <- a.bl.z.up*C.z.up + VF.grid$z.int[,1,]*(D.grid$z.int[,1,]/
            grid$dz.aux[1] + (1-AFDW.grid$z.int[,1,])*v.grid$z.int[,1,])*C[,1,]
     denom <- a.bl.z.up + VF.grid$z.int[,1,]*(D.grid$z.int[,1,]/grid$dz.aux[1]+
              AFDW.grid$z.int[,1,]*v.grid$z.int[,1,])
@@ -564,8 +538,8 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   }
 
 ## when lower z boundary layer is present, calculate new C.z.down
-  if (!is.null(a.bl.z.down[1]) & !is.null(C.bl.z.down[1]))   {
-	  nom <- a.bl.z.down*C.bl.z.down + VF.grid$z.int[,(Nz+1),]*
+  if (!is.null(a.bl.z.down[1]) & !is.null(C.z.down[1]))   {
+	  nom <- a.bl.z.down*C.z.down + VF.grid$z.int[,(Nz+1),]*
            (D.grid$z.int[,,(Nz+1)]/grid$dz.aux[(Nz+1)] +
            (1-AFDW.grid$z.int[,,(Nz+1)])*v.grid$z.int[,,(Nz+1)])*C[,,Nz]
     denom <- a.bl.z.down + VF.grid$z.int[,,(Nz+1)]*(D.grid$z.int[,,(Nz+1)]/

@@ -354,8 +354,8 @@ which can be plotted as follows:
   The default input for the \code{tran.1D()} function in \proglang{R} is:
   \begin{verbatim}
     tran.1D(C, C.up = C[1], C.down = C[length(C)],
-      flux.up = NULL, flux.down = NULL, a.bl.up = NULL, C.bl.up = NULL,
-      a.bl.down = NULL, C.bl.down = NULL,
+      flux.up = NULL, flux.down = NULL, 
+      a.bl.up = NULL, a.bl.down = NULL, 
       D = 0, v = 0, AFDW = 1, VF = 1, A = 1, dx,
       full.check = FALSE, full.output = FALSE)
   \end{verbatim}
@@ -367,9 +367,8 @@ which can be plotted as follows:
       (\code{C.up, C.down}).
     \item  \code{flux.up, flux.down}.  The fluxes, per unit of total surface,
       at the upstream and downstream boundaries, ($M L^{-2} t^{-1}$).
-    \item \code{a.bl.up, C.bl.up, a.bl.down, C.bl.down}, the convective
-      transfer coefficients (\code{a.bl}, $L t^{-1}$) and boundary layer
-      concentrations \code{C.bl}
+    \item \code{a.bl.up, a.bl.down}, the convective
+      transfer coefficients.
     \item \code{D}, the diffusion (dispersion) coefficients, either
       one value, or a vector (\code{D}) or packed as a \code{grid},
       ($L^2 t^{-1}$).
@@ -840,8 +839,7 @@ sol$F.up + sol$F.lat - sol$F.down - sum(sol$y*k*Volume)
 tran.2D ( C, C.x.up=C[1,], C.x.down=C[nrow(C),],
   C.y.up=C[,1], C.y.down=C[,ncol(C)],
   flux.x.up=NULL, flux.x.down=NULL, flux.y.up=NULL, flux.y.down=NULL,
-  a.bl.x.up=NULL, C.bl.x.up=NULL, a.bl.x.down=NULL, C.bl.x.down=NULL,
-  a.bl.y.up=NULL, C.bl.y.up=NULL, a.bl.y.down=NULL, C.bl.y.down=NULL,
+  a.bl.x.up=NULL, a.bl.x.down=NULL, a.bl.y.up=NULL, a.bl.y.down=NULL,  
   D.grid=NULL, D.x=NULL, D.y=D.x,
   v.grid=NULL, v.x=0, v.y=0,
   AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x,
@@ -858,7 +856,7 @@ tran.2D ( C, C.x.up=C[1,], C.x.down=C[nrow(C),],
       the 2-D grid (\code{C}) and the boundary concentrations
     \item \code{flux.x.up, flux.x.down, ...} are the fluxes
       prescribed at the boundaries,
-    \item \code{a.bl.up, C.bl.up, ...} are the parameters for
+    \item \code{a.bl.up, ...} are the exchange coefficients for
       transfer across the various boundary layers
     \item \code{D.x, ...} are the diffusion coefficients
     \item \code{v.x, ...} are the advective velocities

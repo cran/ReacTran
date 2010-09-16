@@ -20,25 +20,27 @@
 }
 
 \usage{
-setup.prop.2D(func = NULL, y.func = func, value = NULL,
-  y.value = value, grid,...)
+setup.prop.2D(func = NULL, value = NULL, grid, y.func = func, 
+  y.value = value, ...)
 
 \method{contour}{prop.2D}(x, grid, xyswap = FALSE, filled = FALSE, \dots)
 }
 
 \arguments{
-  \item{func }{function that describes the spatial dependency in the x-direction
-  }
-  \item{y.func }{function that describes the spatial dependency in the
-    y-direction. By default the same as in the x-direction.
+  \item{func }{function that describes the spatial dependency in the 
+    x-direction; defined as \code{func <- function (x,y, ...)}
   }
   \item{value }{constant value given to the property in the x-direction
   }
-  \item{y.value }{constant value given to the property in the y-direction.
-    By default the same as in the x-direction.
-  }
   \item{grid }{list specifying the 2D grid characteristics, see
     \code{\link{setup.grid.2D}} for details on the structure of this list
+  }
+  \item{y.func }{function that describes the spatial dependency in the
+    y-direction. By default the same as in the x-direction.
+    \code{y.func <- function (x, y, ...)}
+  }
+  \item{y.value }{constant value given to the property in the y-direction.
+    By default the same as in the x-direction.
   }
   \item{x }{the object of class \code{prop.2D} that needs plotting
   }
@@ -74,6 +76,15 @@ setup.prop.2D(func = NULL, y.func = func, value = NULL,
 \author{
   Filip Meysman <f.meysman@nioo.knaw.nl>,
   Karline Soetaert <k.soetaert@nioo.knaw.nl>
+}
+
+\note{
+  For some properties, it does not make sense to use \code{y.func} different 
+  to \code{func}. For instance, for volume fractions, AFDW.
+  
+  For other properties, it may be usefull to have \code{y.func} or 
+  \code{y.value} different from \code{func} or \code{value}, for instance
+  for velocities, surface areas, ...
 }
 
 \examples{
