@@ -155,12 +155,12 @@ tran.cylindrical <- function(C, C.r.up = NULL, C.r.down = NULL,
       dC = numeric(Nr*Ntheta*Nz))  
 
   list(dC = array(dim=c(Nr, Ntheta, Nz), tr$dC),
-       flux.r.up   = matrix(nr=Ntheta, nc = Nz, tr$Fluxrup), 
-       flux.r.down = matrix(nr=Ntheta, nc = Nz, tr$Fluxrdown),
-       flux.theta.up   = matrix(nr=Nr, nc = Nz, tr$Fluxthetaup), 
-       flux.theta.down = matrix(nr=Nr, nc = Nz, tr$Fluxthetadown),
-       flux.z.up   = matrix(nr=Nr, nc = Ntheta, tr$FluxZup), 
-       flux.z.down = matrix(nr=Nr, nc = Ntheta, tr$FluxZdown) 
+       flux.r.up       = matrix(nrow=Ntheta, ncol = Nz, tr$Fluxrup),
+       flux.r.down     = matrix(nrow=Ntheta, ncol = Nz, tr$Fluxrdown),
+       flux.theta.up   = matrix(nrow=Nr, ncol = Nz, tr$Fluxthetaup),
+       flux.theta.down = matrix(nrow=Nr, ncol = Nz, tr$Fluxthetadown),
+       flux.z.up       = matrix(nrow=Nr, ncol = Ntheta, tr$FluxZup),
+       flux.z.down     = matrix(nrow=Nr, ncol = Ntheta, tr$FluxZdown)
        )
 }   
 
@@ -327,11 +327,11 @@ tran.spherical <- function(C, C.r.up = NULL, C.r.down = NULL,
       dC = numeric(Nr*Ntheta*Nphi))  
 
   list(dC = array(dim=c(Nr, Ntheta, Nphi), tr$dC),
-       flux.r.up   = matrix(nr=Ntheta, nc = Nphi, tr$Fluxrup), 
-       flux.r.down = matrix(nr=Ntheta, nc = Nphi, tr$Fluxrdown),
-       flux.theta.up   = matrix(nr=Nr, nc = Nphi, tr$Fluxthetaup), 
-       flux.theta.down = matrix(nr=Nr, nc = Nphi, tr$Fluxthetadown),
-       flux.phi.up   = matrix(nr=Nr, nc = Ntheta, tr$Fluxphiup), 
-       flux.phi.down = matrix(nr=Nr, nc = Ntheta, tr$Fluxphidown) 
+       flux.r.up       = matrix(nrow=Ntheta, ncol = Nphi, tr$Fluxrup),
+       flux.r.down     = matrix(nrow=Ntheta, ncol = Nphi, tr$Fluxrdown),
+       flux.theta.up   = matrix(nrow=Nr, ncol = Nphi, tr$Fluxthetaup),
+       flux.theta.down = matrix(nrow=Nr, ncol = Nphi, tr$Fluxthetadown),
+       flux.phi.up     = matrix(nrow=Nr, ncol = Ntheta, tr$Fluxphiup),
+       flux.phi.down   = matrix(nrow=Nr, ncol = Ntheta, tr$Fluxphidown)
        )
 }   

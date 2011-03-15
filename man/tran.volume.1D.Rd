@@ -22,10 +22,10 @@
 }
 
 \usage{
-tran.volume.1D(C, C.up=C[1], C.down=C[length(C)],
-   C.lat=C, F.up=NULL, F.down=NULL, F.lat=NULL,
-   Disp,	flow = 0, flow.lat=NULL, AFDW = 1,
-   V=NULL, full.check = FALSE, full.output = FALSE)
+tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
+               C.lat = C, F.up = NULL, F.down = NULL, F.lat = NULL,
+               Disp,	flow = 0, flow.lat = NULL, AFDW = 1,
+               V = NULL, full.check = FALSE, full.output = FALSE)
 
 }
 
@@ -134,12 +134,14 @@ tran.volume.1D(C, C.up=C[1], C.down=C[length(C)],
 # Model formulation  #
 #====================#
 
-river.model <- function (t=0,OC,pars=NULL)
-{
-tran <- tran.volume.1D(C=OC,F.up=F.OC,F.lat=F.lat,Disp=Disp,
-flow=flow.up,flow.lat=flow.lat,V=Volume)$dC 
-reac <- - k*OC
-return(list(dCdt = tran + reac))
+river.model <- function (t = 0, OC, pars = NULL) {
+
+  tran <- tran.volume.1D(C = OC, F.up = F.OC, F.lat = F.lat,
+          Disp = Disp, flow = flow.up, flow.lat = flow.lat, 
+          V = Volume, full.output = TRUE) 
+
+  reac <- - k*OC
+  return(list(dCdt = tran$dC + reac, Flow = tran$flow))
 }
 
 #======================#
@@ -151,8 +153,8 @@ return(list(dCdt = tran + reac))
 nbox          <- 500     # number of grid cells
 lengthEstuary <- 100000  # length of estuary [m]
 BoxLength     <- lengthEstuary/nbox # [m]
-Distance      <- seq(BoxLength/2, by=BoxLength, len=nbox) # [m]
-Int.Distance  <- seq(0, by=BoxLength, len=(nbox+1)) # [m]
+Distance      <- seq(BoxLength/2, by = BoxLength, len =nbox) # [m]
+Int.Distance  <- seq(0, by = BoxLength, len = (nbox+1))      # [m]
 
 # Cross sectional area: sigmoid function of estuarine distance [m2]
 CrossArea <- 4000 + 72000 * Distance^5 /(Distance^5+50000^5)
@@ -175,39 +177,38 @@ k       <- 10/(365*24*3600)  # decay constant organic carbon [s-1]
 # Model solution     #
 #====================#
 #scenario 1: without lateral input
-F.lat <- rep(0,length.out=nbox)
-flow.lat <- rep(0,length.out=nbox)
-Conc1 <- steady.band(runif(nbox),fun=river.model,nspec=1)$y   
-tran1 <- tran.volume.1D(C=Conc1,F.up=F.OC,F.lat=F.lat,Disp=Disp,
-flow=flow.up,flow.lat=flow.lat,V=Volume,full.output=TRUE)
+F.lat    <- rep(0, length.out = nbox)
+flow.lat <- rep(0, length.out = nbox)
 
-#scenario 1: with lateral input
-F.lat <- F.lat.0*dnorm(x=Distance/lengthEstuary,
-mean = Distance[nbox/2]/lengthEstuary, sd = 1/20, log = FALSE)/nbox 
-flow.lat <- flow.lat.0*dnorm(x=Distance/lengthEstuary,
-mean = Distance[nbox/2]/lengthEstuary, sd = 1/20, log = FALSE)/nbox 
-Conc2 <- steady.band(runif(nbox),fun=river.model,nspec=1)$y   
-tran2 <- tran.volume.1D(C=Conc2,F.up=F.OC,F.lat=F.lat,Disp=Disp,
-flow=flow.up,flow.lat=flow.lat,V=Volume,full.output=TRUE)
+Conc1 <- steady.1D(runif(nbox), fun = river.model, nspec = 1, name = "OC")   
+
+#scenario 2: with lateral input
+F.lat <- F.lat.0 * dnorm(x =Distance/lengthEstuary,
+                         mean = Distance[nbox/2]/lengthEstuary, 
+                         sd = 1/20, log = FALSE)/nbox 
+flow.lat <- flow.lat.0 * dnorm(x = Distance/lengthEstuary,
+                               mean = Distance[nbox/2]/lengthEstuary, 
+                               sd = 1/20, log = FALSE)/nbox 
+
+Conc2 <- steady.1D(runif(nbox), fun = river.model, nspec = 1, name = "OC")   
 
 #====================#
 # Plotting output    #
 #====================#
-par(mfrow=c(2,1))
+# use S3 plot method
+plot(Conc1, Conc2, grid = Distance/1000, which = "OC", 
+     mfrow = c(2, 1), lwd = 2, xlab = "distance [km]", 
+     main = "Organic carbon decay in the estuary",
+     ylab = "OC Concentration [mM]")
+       
+plot(Conc1, Conc2, grid = Int.Distance/1000, which = "Flow", 
+     mfrow = NULL, lwd = 2, xlab = "distance [km]", 
+     main = "Longitudinal change in the water flow rate",
+     ylab = "Flow rate [m3 s-1]")  
 
-matplot(Distance/1000,cbind(Conc1,Conc2),lwd=2,
-main="Organic carbon decay in the estuary",xlab="distance [km]",
-ylab="OC Concentration [mM]",
-type="l")  
-legend ("topright",lty=1,col=c("black","red"),
-        c("baseline","with side river input"))
+legend ("topright", lty = 1:2, col = 1:2, lwd = 2,
+        c("baseline", "+ side river input"))
 
-matplot(Int.Distance/1000,cbind(tran1$flow,tran2$flow),lwd=2,
-main="Longitudinal change in the water flow rate",xlab="distance [km]",
-ylab="Flow rate [m3 s-1]", ylim=c(0,400),
-type="l")  
-legend ("bottomright",lty=1,col=c("black","red"),
-        c("baseline","with side river input"))
 }
 \references{
   Soetaert and Herman (2009) A practical guide to ecological modelling -

@@ -17,10 +17,10 @@
 
 \usage{
 tran.1D(C, C.up = C[1], C.down = C[length(C)],
-  flux.up = NULL, flux.down = NULL, 
-  a.bl.up = NULL, a.bl.down = NULL, 
-  D = 0, v = 0, AFDW = 1, VF = 1, A = 1, dx,
-  full.check = FALSE, full.output = FALSE)
+        flux.up = NULL, flux.down = NULL, 
+        a.bl.up = NULL, a.bl.down = NULL, 
+        D = 0, v = 0, AFDW = 1, VF = 1, A = 1, dx,
+        full.check = FALSE, full.output = FALSE)
 }
 
 \arguments{
@@ -100,11 +100,11 @@ tran.1D(C, C.up = C[1], C.down = C[length(C)],
   \item{C.down }{concentration at the downstream interface. One value [M/L3]
     only when (\code{full.output} = \code{TRUE})
   }
-  \item{adv.flux }{advective flux across at the interface of each grid cell.
+  \item{dif.flux }{diffusive flux across at the interface of each grid cell.
     A vector of length N+1 [M/L2/T]
     only when (\code{full.output} = \code{TRUE})
   }
-  \item{dif.flux }{diffusive flux across at the interface of each grid cell.
+  \item{adv.flux }{advective flux across at the interface of each grid cell.
     A vector of length N+1 [M/L2/T]
     only when (\code{full.output} = \code{TRUE})
   }
@@ -138,18 +138,20 @@ tran.1D(C, C.up = C[1], C.down = C[length(C)],
 
 # Monod consumption of oxygen (O2)
 
-O2.model <- function (t=0,O2,pars=NULL) {
-  tran <- tran.1D(C=O2,C.up=C.ow.O2,D=D.grid,v=v.grid,
-  VF=por.grid,dx=grid)$dC
+O2.model <- function (t = 0, O2, pars = NULL) {
+
+  tran <- tran.1D(C = O2, C.up = C.ow.O2, D = D.grid, 
+                  v = v.grid, VF = por.grid, dx = grid)$dC
   reac <- - R.O2*(O2/(Ks+O2))
-  return(list(dCdt = tran+reac))
+  return(list(dCdt = tran + reac))
 }
 
 # First order consumption of organic carbon (OC)
 
-OC.model <- function (t=0,OC,pars=NULL) {
-  tran <- tran.1D(C=OC,flux.up=F.OC,D=Db.grid,v=v.grid,
-  VF=svf.grid,dx=grid)$dC
+OC.model <- function (t = 0, OC, pars = NULL) {
+
+  tran <- tran.1D(C = OC, flux.up = F.OC, D = Db.grid,
+                  v = v.grid, VF = svf.grid, dx = grid)$dC
   reac <- - k*OC
   return(list(dCdt = tran + reac))
 }
@@ -174,15 +176,15 @@ Ks      <- 0.005 # O2 consumption saturation constant
 
 L <- 10   # depth of sediment domain [cm]
 N <- 100  # number of grid layers
-grid <- setup.grid.1D(x.up=0,L=L,N=N)
+grid <- setup.grid.1D(x.up = 0, L = L, N = N)
 
 # Volume fractions 
 
-por.grid <- setup.prop.1D(value=por,grid=grid)
-svf.grid <- setup.prop.1D(value=(1-por),grid=grid)
-D.grid <- setup.prop.1D(value=D,grid=grid)
-Db.grid <- setup.prop.1D(value=Db,grid=grid)
-v.grid <- setup.prop.1D(value=v,grid=grid)
+por.grid <- setup.prop.1D(value = por, grid = grid)
+svf.grid <- setup.prop.1D(value = (1-por), grid = grid)
+D.grid   <- setup.prop.1D(value = D, grid = grid)
+Db.grid  <- setup.prop.1D(value = Db, grid = grid)
+v.grid   <- setup.prop.1D(value = v, grid = grid)
 
 #====================#
 # Model solution     #
@@ -190,33 +192,21 @@ v.grid <- setup.prop.1D(value=v,grid=grid)
 
 # Initial conditions + simulation O2
 
-O2 <- rep(0,length.out=N) 
-O2 <- steady.band(y=O2, func=O2.model, nspec=1)$y
+yini <- rep(0, length.out = N) 
+O2   <- steady.1D(y = yini, func = O2.model, nspec = 1)
 
 # Initial conditions + simulation OC
 
-OC <- rep(0,length.out=N) 
-OC <- steady.band(y=OC, func=OC.model, nspec=1)$y
+yini <- rep(0, length.out = N) 
+OC   <- steady.1D(y = yini, func = OC.model, nspec = 1)
 
-# Plotting output
+# Plotting output, using S3 plot method of package rootSolve"
 
-par(mfrow=c(1,2))
+plot(O2, grid = grid$x.mid, xyswap = TRUE, main = "O2 concentration", 
+     ylab = "depth [cm]", xlab = "", mfrow = c(1,2), type = "p", pch = 16)
 
-matplot(O2,grid$x.mid,pch=16,type="b",ylim=c(L,0),
-xlim=c(min(0,min(O2)),max(O2)),
-xlab="",ylab="depth [cm]",main=expression("O2 concentration"),
-axes=FALSE)
-abline(h = 0)
-axis(pos=0, side=2)
-axis(pos=0, side=3)
-
-matplot(OC,grid$x.mid,pch=16,type="b",ylim=c(L,0),
-xlim=c(min(0,min(OC)),max(OC)),
-xlab="",ylab="depth [cm]",main=expression("OC concentration"),
-axes=FALSE)
-abline(h = 0)
-axis(pos=0, side=2)
-axis(pos=0, side=3)
+plot(OC, grid = grid$x.mid, xyswap = TRUE, main = "C concentration", 
+     ylab = "depth [cm]", xlab = "", mfrow = NULL)
 
 ## =============================================================================
 ## EXAMPLE 2: O2 in a cylindrical and spherical organism
@@ -229,12 +219,16 @@ axis(pos=0, side=3)
 # Model formulation  #
 #====================#
 
-# the numerical model - rate of change=transport-consumption
-Cylinder.Model <- function(time,O2,pars)
-  return (list(tran.1D(C=O2,C.down=BW,D=Da,A=A.cyl,dx=dx)$dC-Q))
+# the numerical model - rate of change = transport-consumption
+Cylinder.Model <- function(time, O2, pars)
+  return (list(
+    tran.1D(C = O2, C.down = BW, D = Da, A = A.cyl, dx = dx)$dC - Q
+    ))
 
-Sphere.Model <- function(time,O2,pars)
-  return (list(tran.1D(C=O2,C.down=BW,D=Da,A=A.sphere,dx=dx)$dC-Q))
+Sphere.Model <- function(time, O2, pars)
+  return (list(
+    tran.1D(C = O2, C.down = BW, D = Da, A = A.sphere, dx = dx)$dC - Q
+    ))
 
 #======================#
 # Parameter definition #
@@ -252,8 +246,8 @@ L      <- 0.05   # cm        length of organism (if a cylinder)
 
 N  <- 40                              # layers in the body
 dx <- R/N                             # thickness of each layer
-x.mid <- seq(dx/2,by=dx,length.out=N) # distance of center to mid-layer
-x.int <- seq(0,by=dx,length.out=N+1)  # distance to layer interface
+x.mid <- seq(dx/2, by = dx, length.out = N) # distance of center to mid-layer
+x.int <- seq(0, by = dx, length.out = N+1)  # distance to layer interface
 
 # Cylindrical surfaces
 A.cyl   <- 2*pi*x.int*L  # surface at mid-layer depth
@@ -266,34 +260,34 @@ A.sphere <- 4*pi*x.int^2 # surface of sphere, at each mid-layer
 #====================#
 
 # the analytical solution of cylindrical and spherical model
-cylinder <- function(Da,Q,BW,R,r)  BW+Q/(4*Da)*(r^2-R^2)
-sphere   <- function(Da,Q,BW,R,r)  BW+Q/(6*Da)*(r^2-R^2)
+cylinder <- function(Da, Q, BW, R, r)  BW + Q/(4*Da)*(r^2-R^2)
+sphere   <- function(Da, Q, BW, R, r)  BW + Q/(6*Da)*(r^2-R^2)
 
 # solve the model numerically for a cylinder
-O2.cyl <- steady.1D (runif(N),
-func=Cylinder.Model,nspec=1,atol=1e-10)$y
+O2.cyl <- steady.1D (y = runif(N), name = "O2", 
+      func = Cylinder.Model, nspec = 1, atol = 1e-10)
 
 # solve the model numerically for a sphere
-O2.sphere <- steady.1D (runif(N),
-func=Sphere.Model,nspec=1,atol=1e-10)$y
+O2.sphere <- steady.1D (y = runif(N), name = "O2", 
+      func = Sphere.Model, nspec = 1, atol = 1e-10)
 
 #====================#
 # Plotting output    #
 #====================#
+# Analytical solution - "observations"
+Ana.cyl   <- cbind(x.mid, O2 = cylinder(Da, Q, BW, R, x.mid))
+Ana.spher <- cbind(x.mid, O2 = sphere(Da, Q, BW, R, x.mid))
 
-par(mfrow=c(1,1))
-
-plot(x.mid,O2.cyl,xlab="distance from centre, cm",ylab="mmol/m3",
-main="tran.1D",sub="diffusion-reaction in a cylinder and sphere")
-lines(x.mid, cylinder(Da,Q,BW,R,x.mid))
-
-points(x.mid, O2.sphere, pch=18,col="red" )
-lines(x.mid, sphere(Da,Q,BW,R,x.mid),col="red")
-
-legend ("topleft",lty=c(1,NA),pch=c(NA,1),
-        c("analytical solution","numerical approximation"))
-legend ("bottomright",pch=c(1,18),lty=1,col=c("black","red"),
-        c("cylinder","sphere"))
+plot(O2.cyl, O2.sphere, grid = x.mid, lwd = 2, lty = 1, col = 1:2, 
+     xlab = "distance from centre, cm", 
+     ylab = "mmol/m3", main = "tran.1D",
+     sub = "diffusion-reaction in a cylinder and sphere",
+     obs = list(Ana.cyl, Ana.spher), obspar = list(pch = 16, col =1:2))
+     
+legend ("topleft", lty = c(1, NA), pch = c(NA, 18),
+        c("numerical approximation", "analytical solution"))
+legend ("bottomright", pch = 16, lty = 1, col = 1:2,
+        c("cylinder", "sphere"))
 
 ## =============================================================================
 ## EXAMPLE 3: O2 consumption in a spherical aggregate
@@ -306,14 +300,14 @@ legend ("bottomright",pch=c(1,18),lty=1,col=c("black","red"),
 # Model formulation  #
 #====================#
 
-Aggregate.Model <- function(time,O2,pars) {
+Aggregate.Model <- function(time, O2, pars) {
 
-  tran <- tran.1D(C=O2, C.down=C.ow.O2,
-    D=D.grid, A=A.grid,
-    VF=por.grid, dx=grid )$dC
+  tran <- tran.1D(C = O2, C.down = C.ow.O2,
+                  D = D.grid, A = A.grid,
+                  VF = por.grid, dx = grid )$dC
 
   reac <- - R.O2*(O2/(Ks+O2))*(O2>0)
-  return(list(dCdt = tran+reac))
+  return(list(dCdt = tran + reac, consumption = -reac))
 
 }
 
@@ -333,18 +327,18 @@ Ks      <- 0.005    # O2 saturation constant [micromol cm-3]
 # Grid definition
 R <- 0.025           # radius of the agggregate [cm]
 N <- 100             # number of grid layers
-grid <- setup.grid.1D(x.up=0,L=R,N=N)
+grid <- setup.grid.1D(x.up = 0, L = R, N = N)
 
 # Volume fractions 
 
-por.grid <- setup.prop.1D(value=por,grid=grid)
-D.grid <- setup.prop.1D(value=D,grid=grid)
+por.grid <- setup.prop.1D(value = por, grid = grid)
+D.grid   <- setup.prop.1D(value = D, grid = grid)
 
 # Surfaces 
 
-A.mid <- 4*pi*grid$x.mid^2  # surface of sphere
-A.int <- 4*pi*grid$x.int^2  # surface of sphere
-A.grid=list(int=A.int,mid=A.mid)
+A.mid <- 4*pi*grid$x.mid^2  # surface of sphere at middle of grid cells
+A.int <- 4*pi*grid$x.int^2  # surface of sphere at interface
+A.grid <- list(int = A.int, mid = A.mid)
 
 #====================#
 # Model solution     #
@@ -352,20 +346,24 @@ A.grid=list(int=A.int,mid=A.mid)
 
 # Numerical solution: staedy state 
 
-O2.agg <- steady.1D (runif(N),
-func=Aggregate.Model,nspec=1,atol=1e-10)$y
+O2.agg <- steady.1D (runif(N), func = Aggregate.Model, nspec = 1,
+                     atol = 1e-10, names = "O2")
 
 #====================#
 # Plotting output    #
 #====================#
 
-par(mfrow=c(1,1))
+par(mfrow = c(1,1))
 
-plot(grid$x.mid,O2.agg,xlab="distance from centre, cm",
-ylab="mmol/m3",
-main="Diffusion-reaction of O2 in a spherical aggregate")
-legend ("bottomright",pch=c(1,18),lty=1,col=c("black"),
+plot(grid$x.mid, O2.agg$y, xlab = "distance from centre, cm",
+     ylab = "mmol/m3",
+     main = "Diffusion-reaction of O2 in a spherical aggregate")
+legend ("bottomright", pch = c(1, 18), lty = 1, col = "black",
         c("O2 concentration"))
+
+# Similar, using S3 plot method of package rootSolve"
+plot(O2.agg, grid = grid$x.mid, which = c("O2", "consumption"),
+     xlab = "distance from centre, cm", ylab = c("mmol/m3","mmol/m3/d")) 
 
 }
 \references{

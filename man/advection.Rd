@@ -29,17 +29,20 @@
   cross-sectional area changes, and hence the velocity changes. 
   
   Volumetric transport implies the use of flows (mass per unit of time). 
+  
+  When solved dynamically, the euler method should be used, unless the
+  first-order upstream method is used.  
 }
 
 \usage{
 advection.1D(C, C.up = C[1], C.down = C[length(C)],
   flux.up = NULL, flux.down = NULL, v, VF = 1, A = 1, dx, 
-  adv.method = c("muscl","super","quick","p3","up"), 
+  dt.default = 1, adv.method = c("muscl", "super", "quick", "p3", "up"),
   full.check = FALSE)
 
 advection.volume.1D(C, C.up = C[1], C.down = C[length(C)],
   F.up = NULL, F.down = NULL, flow, V, 
-  adv.method = c("muscl","super","quick","p3","up"), 
+  dt.default = 1, adv.method = c("muscl", "super", "quick", "p3", "up"),
   full.check = FALSE)
 }
 
@@ -100,6 +103,9 @@ advection.volume.1D(C, C.up = C[1], C.down = C[length(C)],
     at least the elements
     \code{dx} and \code{dx.aux} (see \code{\link{setup.grid.1D}}) [L].
   }
+  \item{dt.default }{timestep to be used, if it cannot be estimated (e.g.
+    when calculating steady-state conditions.
+  }
   \item{V }{volume of cells. One value, or a vector of length N [L^3].
   }
   \item{adv.method }{the advection method, slope limiter used to reduce the 
@@ -124,8 +130,6 @@ advection.volume.1D(C, C.up = C[1], C.down = C[length(C)],
   }
   \item{flux.down }{flux across the downstream boundary, positive = OUT of
     model domain. One value [M/L2/T] - only for \code{advection.1D}.
-  }
-  \item{it }{number of split time iterations that were necessary,
   }
   \item{adv.F }{advective mass flow across at the interface of each grid cell.
     A vector of length N+1 [M/T] - only for \code{advection.volume.1D}.
@@ -168,93 +172,70 @@ model <- function (t, y, parms,...) {
 
 n     <- 100
 dx    <- 100/n
-y     <- c(rep(1,5),rep(2,20),rep(1,n-25))
-v     <- 1.0
+y     <- c(rep(1, 5), rep(2, 20), rep(1, n-25))
+v     <- 2 
 times <- 0:300   # 3 times out and in
 
 #--------------------#
 # model solution     #
 #--------------------#
 
-pm   <- par(mfrow=c(3,3))
+## a plotting function
+plotfun <- function (Out, ...) {
+  plot(Out[1, -1], type = "l", col = "red", ylab = "y", xlab = "x", ...)
+  lines(Out[nrow(Out), 2:(1+n)])
+}
 
-## simple upstream differencing, first using euler - explicit
-out <- euler(y=y, times=times, func=model, parms = 0, 
-  adv.method = "up")
-
-plot(out[1,-1], type="l", col="red", 
-  ylab="y", xlab="x", main = "upstream, euler")
-lines(out[nrow(out)/2,2:(1+n)])
-lines(out[nrow(out),2:(1+n)])
-
-## third-order ustream-biased polynomial
-out2 <- euler(y=y, times=times, func=model, parms = 0, 
-  adv.method = "p3")
-
-plot(out2[1,-1],type="l",col="red", 
-  ylab="y", xlab="x", main = "p3, euler")
-lines(out2[nrow(out),2:(1+n)])
-
-## third order TVD, superbee limiter
-out3 <- euler(y=y, times=times, func=model, parms = 0,  
-  adv.method = "super")
-
-plot(out3[1,-1],type="l",col="red", 
-  ylab="y", xlab="x", main = "superbee, euler")
-lines(out3[nrow(out3),2:(1+n)])
-
-## third order TVD, muscl limiter
-out4 <- euler(y=y, times=times, func=model, parms = 0, 
-  adv.method = "muscl")
-
-plot(out4[1,-1],type="l",col="red", 
-  ylab="y", xlab="x", main = "muscl, euler")
-lines(out4[nrow(out4),2:(1+n)])
+# courant number = 2
+pm   <- par(mfrow = c(2, 2))
 
 ## third order TVD, quickest limiter
-out5 <- euler(y=y, times=times, func=model, parms = 0,  
-  adv.method = "quick")
+out <- ode.1D(y = y, times = times, func = model, parms = 0, hini = 1,
+              method = "euler", nspec = 1, adv.method = "quick")
 
-plot(out5[1,-1],type="l",col="red", 
-  ylab="y", xlab="x", main = "quickest, euler")
-lines(out5[nrow(out5),2:(1+n)])
+plotfun(out, main = "quickest, euler") 
 
-## Now upstrem, quickest scheme and muscle, using ode.1D 
-## variable time step, implicit
+## third-order ustream-biased polynomial
+out2 <- ode.1D(y = y, times = times, func = model, parms = 0, hini = 1,
+              method = "euler", nspec = 1, adv.method = "p3")
 
-out <- ode.1D(y=y, times=times, func=model, parms = 0, nspec=1, 
-  adv.method = "up")
+plotfun(out2, main = "p3, euler")
 
-plot(out[1,-1], type="l", col="red", 
-  ylab="y", xlab="x", main = "upstream, implicit")
-lines(out[nrow(out),2:(1+n)])
+## third order TVD, superbee limiter
+out3 <- ode.1D(y = y, times = times, func = model, parms = 0, hini = 1,
+              method = "euler", nspec = 1, adv.method = "super")
 
-out4 <- ode.1D(y=y, times=times, func=model, parms = 0, nspec=1, 
-  adv.method = "muscl")
+plotfun(out3, main = "superbee, euler")
 
-plot(out4[1,-1],type="l",col="red", 
-  ylab="y", xlab="x", main = "muscl, implicit")
-lines(out4[nrow(out4),2:(1+n)])
+## third order TVD, muscl limiter
+out4 <- ode.1D(y = y, times = times, func = model, parms = 0, hini = 1,
+              method = "euler", nspec = 1, adv.method = "muscl")
 
-out5 <- ode.1D(y=y, times=times, func=model, parms = 0, nspec=1, 
-  adv.method = "quick")
+plotfun(out4, main = "muscl, euler")
 
-plot(out5[1,-1],type="l",col="red", 
-  ylab="y", xlab="x", main = "quickest, implicit")
-lines(out5[nrow(out5),2:(1+n)])
+## =============================================================================
+## upstream, different time-steps , i.e. different courant number
+## =============================================================================
+out <- ode.1D(y = y, times = times, func = model, parms = 0, 
+              method = "euler", nspec = 1, adv.method = "up")
 
-## Now quickest scheme, velocity against x-axis
-y     <- rev(c(rep(0,5),rep(1,20),rep(0,n-25)))
-v     <- -1.0
-out6 <- ode.1D(y=y, times=times, func=model, parms = 0, nspec=1, 
-  adv.method = "muscl")
+plotfun(out, main = "upstream, courant number = 2")
 
-plot(out6[1,-1],type="l",col="red", 
-  ylab="y", xlab="x", main = "muscl, reversed velocity")
-lines(out6[nrow(out6),2:(1+n)])
+out2 <- ode.1D(y = y, times = times, func = model, parms = 0, hini = 0.5,  
+               method = "euler", nspec = 1, adv.method = "up")
+plotfun(out2, main = "upstream, courant number = 1")
 
 
-par(mfrow=pm)
+## Now muscl scheme, velocity against x-axis
+y     <- rev(c(rep(0, 5), rep(1, 20), rep(0, n-25)))
+v     <- -2.0
+out6 <- ode.1D(y = y, times = times, func = model, parms = 0, hini = 1,
+               method = "euler", nspec = 1, adv.method = "muscl")
+
+plotfun(out6, main = "muscl, reversed velocity, , courant number = 1")
+
+image(out6, mfrow = NULL)
+par(mfrow = pm)
 
 
 ## =============================================================================
@@ -266,8 +247,8 @@ par(mfrow=pm)
 # Model formulation  #
 #--------------------#
 
-river.model <- function (t=0, C, pars=NULL, ...)
-{
+river.model <- function (t=0, C, pars = NULL, ...)  {
+
  tran <- advection.volume.1D(C = C, C.up = 0,
                      flow = flow, V = Volume,...)
  return(list(dCdt = tran$dC, F.down = tran$F.down, F.up = tran$F.up))
@@ -283,7 +264,7 @@ nbox          <- 100                # number of grid cells
 lengthRiver   <- 100000             # [m]
 BoxLength     <- lengthRiver / nbox # [m]
 
-Distance      <- seq(BoxLength/2, by=BoxLength, len=nbox)   # [m]
+Distance      <- seq(BoxLength/2, by = BoxLength, len = nbox)   # [m]
 
 # Cross sectional area: sigmoid function of distance [m2]
 CrossArea <- 4000 + 72000 * Distance^5 /(Distance^5+50000^5)
@@ -301,32 +282,32 @@ flow      <- 1000*24*3600   # m3/d, main river upstream inflow
 pm   <- par(mfrow=c(2,2))
 
 # a square pulse
-yini <-  c(rep(10,10),rep(0,nbox-10))
+yini <-  c(rep(10, 10), rep(0, nbox-10))
 
 ## third order TVD, muscl limiter
-Conc <- ode.1D(y =yini, fun=river.model, #atol=1e-10, rtol=1e-10, 
-              nspec=1, times=0:40, adv.method="muscl")
+Conc <- ode.1D(y = yini, fun = river.model,  method = "euler", hini = 1,
+              parms = NULL, nspec = 1, times = 0:40, adv.method = "muscl")
 
-image(Conc, main="muscl", mfrow=NULL)
-plot(Conc[30,2:(1+nbox)], type="l", lwd=2, xlab= "x", ylab="C", 
-     main="muscl after 30 days")
+image(Conc, main = "muscl", mfrow = NULL)
+plot(Conc[30, 2:(1+nbox)], type = "l", lwd = 2, xlab = "x", ylab = "C", 
+     main = "muscl after 30 days")
 
 ## simple upstream differencing
-Conc2<- ode.1D(y = yini, fun=river.model, 
-              nspec=1, times=0:40, adv.method="up")
+Conc2<- ode.1D(y = yini, fun = river.model, method = "euler", hini = 1,
+              parms = NULL, nspec = 1, times = 0:40, adv.method = "up")
 
-image(Conc2, main="upstream", mfrow=NULL)
-plot(Conc2[30,2:(1+nbox)], type="l", lwd=2, xlab= "x", ylab="C", 
-     main="upstream after 30 days")
+image(Conc2, main = "upstream", mfrow = NULL)
+plot(Conc2[30, 2:(1+nbox)], type = "l", lwd = 2, xlab = "x", ylab = "C", 
+     main = "upstream after 30 days")
 
-par(mfrow=pm)
+par(mfrow = pm)
 
 
 # Note: the more sophisticated the scheme, the more mass lost/created
 # increase tolerances to improve this.
 
-Conc[,2:(1+nbox)]->CC
-t(CC)*Volume->MASS
+CC <- Conc[ , 2:(1+nbox)]
+MASS <- t(CC)*Volume     
 colSums(MASS)
 
 ## =============================================================================
@@ -334,28 +315,45 @@ colSums(MASS)
 ## use of advection.volume.1D
 ## =============================================================================
 
-Sink <- function (t, y, parms) {
+Sink <- function (t, y, parms, ...) {
   C1 <- y[1:N]
   C2 <- y[(N+1):(2*N)]
+  C3 <- y[(2*N+1):(3*N)]
+  # Rate of change= Flux gradient and first-order consumption                  
+  
+  # upstream can be implemented in two ways:
+ 
+  dC1  <- advection.1D(C1, v = sink, dx = dx, 
+           C.up = 100, adv.method = "up", ...)$dC - decay*C1
 
-  Flux <- sink * c(100 ,C1)     
-  # Rate of change= Flux gradient and first-order consumption
-  dC1  <- -diff(Flux)/dx - decay*C1
+# same, using tran.1D  
+#  dC1  <- tran.1D(C1, v = sink, dx = dx, 
+#        C.up = 100, D = 0)$dC -
+#           decay*C1
 
   dC2  <- advection.1D(C2, v = sink, dx = dx, 
-        C.up = 100, adv.method = "p3")$dC -
+        C.up = 100, adv.method = "p3", ...)$dC -
            decay*C2
-  list(c(dC1, dC2))
+
+  dC3  <- advection.1D(C3, v = sink, dx = dx, 
+        C.up = 100, adv.method = "muscl", ...)$dC -
+           decay*C3
+
+  list(c(dC1, dC2, dC3))
 }
 
-dx    <- 10                          # thickness of boxes
-sink  <- 500
+N     <- 10
+L     <- 1000
+dx    <- L/N                          # thickness of boxes
+sink  <- 10
 decay <- 0.1
-N     <- 500
-out <- steady.1D(runif(2*N),func=Sink, names=c("C1","C2"),
-        parms=NULL, nspec=2, bandwidth=2)
-          
-plot(out)
+out <- steady.1D(runif(3*N), func = Sink, names = c("C1", "C2", "C3"),
+        parms = NULL, nspec = 3, bandwidth = 2)
+matplot(out$y, 1:N, type = "l", ylim = c(10, 0), lwd = 2, 
+  main = "Steady-state")          
+legend("bottomright", col = 1:3, lty = 1:3, 
+  c("upstream", "p3", "muscl"))
+
 
 }
 \references{
@@ -424,7 +422,8 @@ van Leer B. (1979) Towards the ultimate conservative difference scheme V. A seco
     \item "super": third-order scheme (TVD) with Superbee limiter (method=Superbee)
       (Roe, 1985)
     \item "p3": third-order upstream-biased polynomial scheme (method=P3)
-    \item "up": first-order upstream ( method=UPSTREAM)
+    \item "up": first-order upstream ( method=UPSTREAM) - this is the same
+      method as implemented in \link{tran.1D} or \link{tran.volume.1D}
   }
   where "TVD" means a total variation diminishing scheme
 

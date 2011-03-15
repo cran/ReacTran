@@ -10,7 +10,7 @@
 }
 
 \usage{
-setup.grid.2D(x.grid=NULL, y.grid=NULL)
+setup.grid.2D(x.grid = NULL, y.grid = NULL)
 }
 
 \arguments{
@@ -78,9 +78,9 @@ setup.grid.2D(x.grid=NULL, y.grid=NULL)
 
 \examples{
 # test of the setup.grid.2D functionality
-x.grid <- setup.grid.1D(x.up=0,L=10,N=5)
-y.grid <- setup.grid.1D(x.up=0,L=20,N=10)
-(grid2D <- setup.grid.2D(x.grid,y.grid))
+x.grid  <- setup.grid.1D(x.up = 0, L = 10, N = 5)
+y.grid  <- setup.grid.1D(x.up = 0, L = 20, N = 10)
+(grid2D <- setup.grid.2D(x.grid, y.grid))
 
 }
 \keyword{utilities}

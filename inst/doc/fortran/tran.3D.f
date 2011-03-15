@@ -20,7 +20,7 @@ C input
       DOUBLE PRECISION C(Nx,Ny,Nz) 
 
 C when Bc.. = 2,4; boundary concentrations 
-	DOUBLE PRECISION Cxup, Cxdown, Cyup, Cydown, Czup, Czdown 
+      DOUBLE PRECISION Cxup, Cxdown, Cyup, Cydown, Czup, Czdown 
 C when Bc.. = 1: boundary fluxes
       DOUBLE PRECISION Fxup, Fxdown, Fyup, Fydown, Fzup, Fzdown
 C when Bc.. = 4: boundary convective coefficients
@@ -37,11 +37,11 @@ C output: fluxes out and inside the domain..
       DOUBLE PRECISION FluxYup(Nx, Nz), FluxYdown(Nx, Nz)
       DOUBLE PRECISION FluxZup(Ny, Nz), FluxZdown(Ny, Nz)
 C         rate of change      
-	DOUBLE PRECISION dC(Nx,Ny,Nz)
+      DOUBLE PRECISION dC(Nx,Ny,Nz)
 
 C locals
       INTEGER          I, J, K
-	DOUBLE PRECISION Flux(Nx+1, Ny+1, Nz+1)
+      DOUBLE PRECISION Flux(Nx+1, Ny+1, Nz+1)
 
 C -------------------------------------------------------------------------------
 C First diffusion internal cells
@@ -84,12 +84,12 @@ C upstream X-boundary
 
       ENDIF
 
-	DO J = 1, Ny
-	  DO K = 1, Nz
+      DO J = 1, Ny
+        DO K = 1, Nz
           FluxXup(J,K) = Flux(1,J,K)
         ENDDO
       ENDDO
-	 
+       
 C downstream X-boundary
       IF (BCxDown .EQ. 1) THEN
         DO J = 1, Ny 
@@ -117,8 +117,8 @@ C downstream X-boundary
 
       ENDIF
 
-	DO J = 1, Ny
-	  DO K = 1, Nz
+      DO J = 1, Ny
+        DO K = 1, Nz
           FluxXdown(J,K) = Flux(Nx+1,J,K)
         ENDDO
       ENDDO
@@ -171,8 +171,8 @@ C upstream Y-boundary
 
       ENDIF
 
-	DO I = 1, Nx
-	  DO K = 1, Nz
+      DO I = 1, Nx
+        DO K = 1, Nz
           FluxYup(I,K) = Flux(I,1,K)
         ENDDO
       ENDDO
@@ -204,8 +204,8 @@ C downstream Y-boundary
 
       ENDIF
 
-	DO I = 1, Nx
-	  DO K = 1, Nz
+      DO I = 1, Nx
+        DO K = 1, Nz
           FluxYdown(I,K) = Flux(I,Ny+1,K)
         ENDDO
       ENDDO
@@ -259,7 +259,7 @@ C upstream Y-boundary
 
       ENDIF
 
-	DO I = 1, Nx
+      DO I = 1, Nx
           DO J = 1, Ny
             FluxZup(I,J) = Flux(I,J,1)
         ENDDO
@@ -292,7 +292,7 @@ C downstream Z-boundary
 
       ENDIF
 
-	DO I = 1, Nx
+      DO I = 1, Nx
         DO J = 1, Ny
           FluxZdown(I,J) = Flux(I,J,Nz+1)
         ENDDO
@@ -333,7 +333,7 @@ C concentration
       DOUBLE PRECISION C(Nr, Ntet, Nphi)
 
 C used when Bc.. = 2
-	DOUBLE PRECISION Crup, Crdown, Ctetup, Ctetdown, Cphiup, Cphidown
+      DOUBLE PRECISION Crup, Crdown, Ctetup, Ctetdown, Cphiup, Cphidown
 
 C used when Bc.. = 1
       DOUBLE PRECISION Frup, Frdown, Ftetup, Ftetdown, Fphiup, Fphidown
@@ -355,7 +355,7 @@ C output
 
 C locals
       INTEGER I, J, K 
-	DOUBLE PRECISION Flux(Nr+1, Ntet+1, Nphi+1), Cbound
+      DOUBLE PRECISION Flux(Nr+1, Ntet+1, Nphi+1), Cbound
 
 C -------------------------------------------------------------------------------
 
@@ -413,7 +413,7 @@ C First diffusion internal cells
 C Then the outer cells - depending on boundary type
 C upstream r-boundary
       
-	IF (Bcrup .EQ. 1) THEN
+      IF (Bcrup .EQ. 1) THEN
         DO J = 1, Ntet 
           DO K = 1, Nphi
             Flux(1,J,K) = Frup
@@ -431,19 +431,19 @@ C upstream r-boundary
         Flux(1,:,:) = 0.D0
 
       ELSE IF (Bcrup .EQ. 5) THEN
-	  DO J = 1, Ntet
+        DO J = 1, Ntet
           DO K = 1, Nphi
-	    Cbound = (C(1,J,K)*draux(Nr+1) + C(Nr,J,K)*draux(1))  /                &
+          Cbound = (C(1,J,K)*draux(Nr+1) + C(Nr,J,K)*draux(1))  /                &
      &              (draux(1)+draux(Nr+1))
           Flux(1,J,K)    = -D_r(1)    * (C(1,J,K)-Cbound ) /draux(1)
           Flux(Nr+1,J,K) = -D_r(Nr+1) * (Cbound-C(Nr,J,K)) /draux(Nr+1)
-	    ENDDO
-	  ENDDO
+          ENDDO
+        ENDDO
 
       ENDIF
 
-	DO J = 1, Ntet
-	  DO K = 1, Nphi
+      DO J = 1, Ntet
+        DO K = 1, Nphi
           Fluxrup(J,K) = Flux(1,J,K)
         ENDDO
       ENDDO
@@ -469,8 +469,8 @@ C downstream r-boundary
 
       ENDIF
 
-	DO J = 1, Ntet
-	  DO K = 1, Nphi
+      DO J = 1, Ntet
+        DO K = 1, Nphi
           Fluxrdown(J,K) = Flux(Nr+1,J,K)
         ENDDO
       ENDDO
@@ -482,7 +482,7 @@ C Rate of change in r-direction
           DO K = 1, Nphi
             IF(rc(I) .NE. 0.D0)                                                  &
      &      dC(I,J,K) =                                                          &
-     &		  -(Flux(I+1,J,K)*(r(I+1)**2.)-Flux(I,J,K)*(r(I)**2.))             &
+     &          -(Flux(I+1,J,K)*(r(I+1)**2.)-Flux(I,J,K)*(r(I)**2.))             &
      &                  /dr(I)/(rc(I)**2.)
           ENDDO
         ENDDO
@@ -516,28 +516,28 @@ C upstream teta-boundary
         DO I = 1, Nr
           DO K = 1, Nphi
            Flux(I,1,K) = -D_tet(1)*(C(I,1,K)-Ctetup)/dtetaux(1)/rc(I)
-		ENDDO  
+          ENDDO  
         ENDDO
 
       ELSE IF (BcTetup .EQ. 3) THEN
         Flux(:,1,:) = 0.D0
 
       ELSE IF (BcTetup .EQ. 5) THEN
-	  DO I = 1, Nr
+        DO I = 1, Nr
           DO K = 1, Nphi
-	    Cbound = (C(I,1,K)*dtetaux(Ntet+1) + C(I,Ntet,K)*dtetaux(1))/          &
+          Cbound = (C(I,1,K)*dtetaux(Ntet+1) + C(I,Ntet,K)*dtetaux(1))/          &
      &              (dtetaux(1)+dtetaux(Ntet+1))
           Flux(I,1,K)      = -D_tet(1)     *(C(I,1,K)-Cbound)                    &
      &                                       /dtetaux(1)/rc(I) 
           Flux(I,Ntet+1,K) = -D_tet(Ntet+1)*(Cbound-C(I,Ntet,K))                 & 
      &                                       /dtetaux(Ntet+1)/rc(I) 
-	    ENDDO
-	  ENDDO
+          ENDDO
+        ENDDO
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO K = 1, Nphi
+      DO I = 1, Nr
+        DO K = 1, Nphi
           Fluxtetup(I,K) = Flux(I,1,K)
         ENDDO
       ENDDO
@@ -564,8 +564,8 @@ C downstream teta-boundary
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO K = 1, Nphi
+      DO I = 1, Nr
+        DO K = 1, Nphi
           Fluxtetdown(I,K) = Flux(I,Ntet+1,K)
         ENDDO
       ENDDO
@@ -613,28 +613,28 @@ C upstream phi-boundary
           DO J = 1, Ntet
            Flux(I,J,1) = -D_phi(1)*(C(I,J,1)-Cphiup)                             &
      &                            /dphiaux(1)/rc(I) /sin(tet(j))
-		ENDDO  
+          ENDDO  
         ENDDO
 
       ELSE IF (BcPhiup .EQ. 3) THEN
         Flux(:,:,1) = 0.D0
 
       ELSE IF (BcPhiup .EQ. 5) THEN
-	  DO I = 1, Nr
+        DO I = 1, Nr
           DO J = 1, Ntet
-	    Cbound = (C(I,J,1)*dphiaux(Nphi+1) + C(I,J,Nphi)*dphiaux(1))/          &
+          Cbound = (C(I,J,1)*dphiaux(Nphi+1) + C(I,J,Nphi)*dphiaux(1))/          &
      &              (dphiaux(1)+dphiaux(Nphi+1))
           Flux(I,J,1)      = -D_phi(1)*(C(I,J,1)-Cbound)                         &
      &                             /dphiaux(1)     /rc(I) /sin(tet(j))
           Flux(I,J,Nphi+1) = -D_phi(Nphi+1)*(Cbound-C(I,J,Nphi))                 & 
      &                             /dphiaux(Nphi+1)/rc(I) /sin(tet(j))               
           ENDDO                                      
-	  ENDDO
+        ENDDO
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO J = 1, Ntet
+      DO I = 1, Nr
+        DO J = 1, Ntet
           Fluxphiup(I,J) = Flux(I,J,1)
         ENDDO
       ENDDO
@@ -661,8 +661,8 @@ C downstream phi-boundary
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO J = 1, Ntet
+      DO I = 1, Nr
+        DO J = 1, Ntet
           Fluxphidown(I,J) = Flux(I,J,Nphi+1)
         ENDDO
       ENDDO
@@ -705,7 +705,7 @@ C concentration
       DOUBLE PRECISION C(Nr, Ntet, Nz)
 
 C used when Bc.. = 2
-	DOUBLE PRECISION Crup, Crdown, Ctetup, Ctetdown, Czup, Czdown
+      DOUBLE PRECISION Crup, Crdown, Ctetup, Ctetdown, Czup, Czdown
 
 C used when Bc.. = 1
       DOUBLE PRECISION Frup, Frdown, Ftetup, Ftetdown, Fzup, Fzdown
@@ -727,7 +727,7 @@ C output
 
 C locals
       INTEGER I, J, K 
-	DOUBLE PRECISION Flux(Nr+1, Ntet+1, Nz+1), Cbound
+      DOUBLE PRECISION Flux(Nr+1, Ntet+1, Nz+1), Cbound
 
 C -------------------------------------------------------------------------------
 
@@ -785,7 +785,7 @@ C First diffusion internal cells
 C Then the outer cells - depending on boundary type
 C upstream r-boundary
       
-	IF (Bcrup .EQ. 1) THEN
+      IF (Bcrup .EQ. 1) THEN
         DO J = 1, Ntet 
           DO K = 1, Nz
             Flux(1,J,K) = Frup
@@ -803,19 +803,19 @@ C upstream r-boundary
         Flux(1,:,:) = 0.D0
 
       ELSE IF (Bcrup .EQ. 5) THEN
-	  DO J = 1, Ntet
+        DO J = 1, Ntet
           DO K = 1, Nz
-	    Cbound = (C(1,J,K)*draux(Nr+1) + C(Nr,J,K)*draux(1))  /                &
+          Cbound = (C(1,J,K)*draux(Nr+1) + C(Nr,J,K)*draux(1))  /                &
      &              (draux(1)+draux(Nr+1))
           Flux(1,J,K)    = -D_r(1)    * (C(1,J,K)-Cbound ) /draux(1)
           Flux(Nr+1,J,K) = -D_r(Nr+1) * (Cbound-C(Nr,J,K)) /draux(Nr+1)
-	    ENDDO
-	  ENDDO
+          ENDDO
+        ENDDO
 
       ENDIF
 
-	DO J = 1, Ntet
-	  DO K = 1, Nz
+      DO J = 1, Ntet
+        DO K = 1, Nz
           Fluxrup(J,K) = Flux(1,J,K)
         ENDDO
       ENDDO
@@ -841,8 +841,8 @@ C downstream r-boundary
 
       ENDIF
 
-	DO J = 1, Ntet
-	  DO K = 1, Nz
+      DO J = 1, Ntet
+        DO K = 1, Nz
           Fluxrdown(J,K) = Flux(Nr+1,J,K)
         ENDDO
       ENDDO
@@ -854,7 +854,7 @@ C Rate of change in r-direction
            DO K = 1, Nz
             IF (rc(I) .NE. 0.D0)                                                 &
      &      dC(I,J,K) =                                                          &
-     &		  -(Flux(I+1,J,K)*r(I+1) - Flux(I,J,K)*r(I))/dr(I)/(rc(I))
+     &          -(Flux(I+1,J,K)*r(I+1) - Flux(I,J,K)*r(I))/dr(I)/(rc(I))
           ENDDO
         ENDDO
       ENDDO
@@ -887,28 +887,28 @@ C upstream teta-boundary
         DO I = 1, Nr
           DO K = 1, Nz
            Flux(I,1,K) = -D_tet(1)*(C(I,1,K)-Ctetup)/dtetaux(1)/rc(I)
-		ENDDO  
+          ENDDO  
         ENDDO
 
       ELSE IF (BcTetup .EQ. 3) THEN
         Flux(:,1,:) = 0.D0
 
       ELSE IF (BcTetup .EQ. 5) THEN
-	  DO I = 1, Nr
+        DO I = 1, Nr
           DO K = 1, Nz
-	    Cbound = (C(I,1,K)*dtetaux(Ntet+1) + C(I,Ntet,K)*dtetaux(1))/          &
+          Cbound = (C(I,1,K)*dtetaux(Ntet+1) + C(I,Ntet,K)*dtetaux(1))/          &
      &              (dtetaux(1)+dtetaux(Ntet+1))
           Flux(I,1,K)      = -D_tet(1)     *(C(I,1,K)-Cbound)                    &
      &                                       /dtetaux(1)/rc(I) 
           Flux(I,Ntet+1,K) = -D_tet(Ntet+1)*(Cbound-C(I,Ntet,K))                 & 
      &                                       /dtetaux(Ntet+1)/rc(I) 
-	    ENDDO
-	  ENDDO
+          ENDDO
+        ENDDO
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO K = 1, Nz
+      DO I = 1, Nr
+        DO K = 1, Nz
           Fluxtetup(I,K) = Flux(I,1,K)
         ENDDO
       ENDDO
@@ -935,8 +935,8 @@ C downstream teta-boundary
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO K = 1, Nz
+      DO I = 1, Nr
+        DO K = 1, Nz
           Fluxtetdown(I,K) = Flux(I,Ntet+1,K)
         ENDDO
       ENDDO
@@ -981,26 +981,26 @@ C upstream z-boundary
         DO I = 1, Nr
           DO J = 1, Ntet
            Flux(I,J,1) = -D_z(1)*(C(I,J,1)-Czup)  /dzaux(1) 
-		ENDDO  
+          ENDDO  
         ENDDO
 
       ELSE IF (BCzUp .EQ. 3) THEN
         Flux(:,:,1) = 0.D0
 
       ELSE IF (BCzUp .EQ. 5) THEN
-	  DO I = 1, Nr
+        DO I = 1, Nr
           DO J = 1, Ntet
-	    Cbound = (C(I,J,1)*dzaux(Nz+1) + C(I,J,Nz)*dzaux(1)) /                 &
+          Cbound = (C(I,J,1)*dzaux(Nz+1) + C(I,J,Nz)*dzaux(1)) /                 &
      &              (dzaux(1)+dzaux(Nz+1))
           Flux(I,J,1)    = -D_z(1)   *(C(I,J,1)-Cbound)  /dzaux(1)    
           Flux(I,J,Nz+1) = -D_z(Nz+1)*(Cbound-C(I,J,Nz)) /dzaux(Nz+1)              
           ENDDO                                      
-	  ENDDO
+        ENDDO
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO J = 1, Ntet
+      DO I = 1, Nr
+        DO J = 1, Ntet
           FluxZup(I,J) = Flux(I,J,1)
         ENDDO
       ENDDO
@@ -1027,8 +1027,8 @@ C downstream z-boundary
 
       ENDIF
 
-	DO I = 1, Nr
-	  DO J = 1, Ntet
+      DO I = 1, Nr
+        DO J = 1, Ntet
           FluxZdown(I,J) = Flux(I,J,Nz+1)
         ENDDO
       ENDDO

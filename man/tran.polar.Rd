@@ -12,11 +12,12 @@
 }
 
 \usage{
-tran.polar (C, C.r.up = NULL, C.r.down = NULL, C.theta.up = NULL, 
-  C.theta.down = NULL, flux.r.up = NULL, flux.r.down = NULL, 
-  flux.theta.up = NULL, flux.theta.down = NULL, cyclicBnd = NULL,
-  D.r = 1, D.theta = D.r, r = NULL, theta = NULL,
-  full.output = FALSE)
+tran.polar (C, C.r.up = NULL, C.r.down = NULL, 
+            C.theta.up = NULL, C.theta.down = NULL, 
+            flux.r.up = NULL, flux.r.down = NULL, 
+            flux.theta.up = NULL, flux.theta.down = NULL, 
+            cyclicBnd = NULL, D.r = 1, D.theta = D.r, 
+            r = NULL, theta = NULL, full.output = FALSE)
 
 polar2cart (out, r, theta, x = NULL, y = NULL)
 
@@ -134,32 +135,33 @@ D        <- 400             # mixing coefficient [cm2 yr-1]
 r.N   <- 4     # number of cells in r-direction
 theta.N <- 6   # number of cells in theta-direction
 r.L <- 8       # domain size r-direction [cm]
-r      <- seq(0,r.L,len=r.N+1)        # cell size r-direction [cm]
-theta  <- seq(0,2*pi,len=theta.N+1)   # theta-direction - theta: from 0, 2pi
+r      <- seq(0, r.L,len = r.N+1)      # cell size r-direction [cm]
+theta  <- seq(0, 2*pi,len = theta.N+1) # theta-direction - theta: from 0, 2pi
  
 # Intial conditions 
-C <- matrix(nrow=r.N, ncol=theta.N, data=0)
+C <- matrix(nrow = r.N, ncol = theta.N, data = 0)
 
 # Boundary conditions: fixed concentration  
-C.r.up       <- rep(1, times=theta.N)
-C.r.down     <- rep(0, times=theta.N)
-C.theta.up   <- rep(1, times=r.N)
-C.theta.down <- rep(0, times=r.N)
+C.r.up       <- rep(1, times = theta.N)
+C.r.down     <- rep(0, times = theta.N)
+C.theta.up   <- rep(1, times = r.N)
+C.theta.down <- rep(0, times = r.N)
 
 # Concentration boundary conditions
-tran.polar(C=C, D.r=D, D.theta=D, 
-  C.r.up=C.r.up, C.r.down=C.r.down, r=r, theta=theta,
-  C.theta.up=C.theta.up,C.theta.down=C.theta.down)
+tran.polar(C = C, D.r = D, D.theta = D, 
+  r = r, theta = theta,
+  C.r.up = C.r.up, C.r.down = C.r.down, 
+  C.theta.up = C.theta.up, C.theta.down = C.theta.down)
 
 # Flux boundary conditions
-flux.r.up <- rep(200, times=theta.N)
-flux.r.down <- rep(-200, times=theta.N)
-flux.theta.up <- rep(200, times=r.N)
-flux.theta.down <- rep(-200, times=r.N)
+flux.r.up <- rep(200, times = theta.N)
+flux.r.down <- rep(-200, times = theta.N)
+flux.theta.up <- rep(200, times = r.N)
+flux.theta.down <- rep(-200, times = r.N)
 
-tran.polar(C=C, D.r=D, r=r, theta=theta,
-  flux.r.up=flux.r.up, flux.r.down=flux.r.down,
-  flux.theta.up=flux.theta.up, flux.theta.down=flux.theta.down,
+tran.polar(C = C, D.r = D, r = r, theta = theta,
+  flux.r.up = flux.r.up, flux.r.down = flux.r.down,
+  flux.theta.up = flux.theta.up, flux.theta.down = flux.theta.down,
   full.output = TRUE)
 
 
@@ -167,35 +169,29 @@ tran.polar(C=C, D.r=D, r=r, theta=theta,
 ## A model with diffusion and first-order consumption
 ## =============================================================================
 N     <- 50          # number of grid cells
-XX    <- 4          # total size
+XX    <- 4           # total size
 rr    <- 0.005       # consumption rate
 ini   <- 1           # initial value at x=0
 D     <- 400
 
-r     <- seq (2, 4, len=N+1)
+r     <- seq (2, 4, len = N+1)
 theta   <- seq(0, 2*pi, len = N+1)
 theta.m <- 0.5*(theta[-1]+theta[-(N+1)])
 
 # The model equations
 
-Diffpolar <- function (t,y,parms)  {
+Diffpolar <- function (t, y, parms)  {
   CONC  <- matrix(nrow = N, ncol = N, data = y)
   tran  <- tran.polar(CONC, D.r = D, D.theta = D, r = r, theta = theta,
-        C.r.up = 0,          C.r.down = 1*sin(5*theta.m), 
-        cyclicBnd = 2   , full.output=TRUE )
+        C.r.up = 0, C.r.down = 1*sin(5*theta.m), 
+        cyclicBnd = 2, full.output=TRUE )
   dCONC <- tran$dC  - rr * CONC
   return (list(dCONC))
 }
 
-# initial condition: 0 everywhere, except in central point
-y <- matrix(nr = N, nc = N, data = 0)
-N2  <- ceiling(N/2)
-
-y[N2,N2] <- ini  # initial concentration in the central point...
-
 # solve to steady-state; cyclicBnd = 2, because of C.theta.up, C.theta.down
-out <- steady.2D (y = y, func = Diffpolar, parms = NULL,
-                dim = c(N,N), lrw = 1e6, cyclicBnd = 2)
+out <- steady.2D (y = rep(0, N*N), func = Diffpolar, parms = NULL,
+                  dim = c(N, N), lrw = 1e6, cyclicBnd = 2)
 
 image(out)
 

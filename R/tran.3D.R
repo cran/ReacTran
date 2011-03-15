@@ -84,12 +84,12 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
   Ny <- dim(C)[2]
   Nz <- dim(C)[3]
 
-  if(length (C.x.up)   == 1) C.x.up   <- matrix(nr=Ny,nc=Nz,C.x.up)
-  if(length (C.x.down) == 1) C.x.down <- matrix(nr=Ny,nc=Nz,C.x.down)
-  if(length (C.y.up)   == 1) C.y.up   <- matrix(nr=Nx,nc=Nz,C.y.up)
-  if(length (C.y.down) == 1) C.y.down <- matrix(nr=Nx,nc=Nz,C.y.down)
-  if(length (C.z.up)   == 1) C.z.up   <- matrix(nr=Nx,nc=Ny,C.z.up)
-  if(length (C.z.down) == 1) C.z.down <- matrix(nr=Nx,nc=Ny,C.z.down)
+  if(length (C.x.up)   == 1) C.x.up   <- matrix(nrow=Ny,ncol=Nz,C.x.up)
+  if(length (C.x.down) == 1) C.x.down <- matrix(nrow=Ny,ncol=Nz,C.x.down)
+  if(length (C.y.up)   == 1) C.y.up   <- matrix(nrow=Nx,ncol=Nz,C.y.up)
+  if(length (C.y.down) == 1) C.y.down <- matrix(nrow=Nx,ncol=Nz,C.y.down)
+  if(length (C.z.up)   == 1) C.z.up   <- matrix(nrow=Nx,ncol=Ny,C.z.up)
+  if(length (C.z.down) == 1) C.z.down <- matrix(nrow=Nx,ncol=Ny,C.z.down)
 
 # DEFAULT INFILLING OF GRID PARAMETERS
 

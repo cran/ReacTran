@@ -29,7 +29,7 @@
     Package: \tab ReacTran\cr
     Type: \tab Package\cr
     Version: \tab 1.3\cr
-    Date: \tab 2010-09-01\cr
+    Date: \tab 2010-11-01\cr
     License: \tab GNU Public License 2 or above\cr
   }
 }
@@ -73,6 +73,13 @@ browseURL(paste(system.file(package="ReacTran"), "/doc/fortran", sep=""))
 }
 \keyword{ package }
 \seealso{
+  Functions \link{ode.1D}, \link{ode.2D}, \link{ode.3D} from package \code{deSolve} 
+  to integrate the reactive-transport model
+  
+  Functions \link{steady.1D}, \link{steady.2D}, \link{steady.3D} from 
+  package \code{rootSolve} to find the steady-state solution of the 
+  reactive-transport model
+
   \code{\link{tran.1D}},   \code{\link{tran.2D}},  \code{\link{tran.3D}} for 
   a discretisation of the general transport equations
 

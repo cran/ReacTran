@@ -14,24 +14,24 @@
 
 \usage{
 tran.cylindrical (C, C.r.up = NULL, C.r.down = NULL, 
-        C.theta.up = NULL, C.theta.down = NULL, 
-        C.z.up = NULL, C.z.down = NULL, 
-        flux.r.up = NULL, flux.r.down = NULL, 
-        flux.theta.up = NULL, flux.theta.down = NULL,          
-        flux.z.up = NULL, flux.z.down = NULL, 
-        cyclicBnd = NULL,
-        D.r = NULL, D.theta = D.r, D.z = D.r, 
-        r = NULL,  theta = NULL, z = NULL)
+                  C.theta.up = NULL, C.theta.down = NULL, 
+                  C.z.up = NULL, C.z.down = NULL, 
+                  flux.r.up = NULL, flux.r.down = NULL, 
+                  flux.theta.up = NULL, flux.theta.down = NULL,          
+                  flux.z.up = NULL, flux.z.down = NULL, 
+                  cyclicBnd = NULL,
+                  D.r = NULL, D.theta = D.r, D.z = D.r, 
+                  r = NULL, theta = NULL, z = NULL)
 
 tran.spherical (C, C.r.up = NULL, C.r.down = NULL, 
-        C.theta.up = NULL, C.theta.down = NULL, 
-        C.phi.up = NULL, C.phi.down = NULL, 
-        flux.r.up = NULL, flux.r.down = NULL, 
-        flux.theta.up = NULL, flux.theta.down = NULL,          
-        flux.phi.up = NULL, flux.phi.down = NULL, 
-        cyclicBnd = NULL,
-        D.r = NULL, D.theta = D.r, D.phi = D.r, 
-        r = NULL,  theta = NULL, phi = NULL)
+                C.theta.up = NULL, C.theta.down = NULL, 
+                C.phi.up = NULL, C.phi.down = NULL, 
+                flux.r.up = NULL, flux.r.down = NULL, 
+                flux.theta.up = NULL, flux.theta.down = NULL,          
+                flux.phi.up = NULL, flux.phi.down = NULL, 
+                cyclicBnd = NULL,
+                D.r = NULL, D.theta = D.r, D.phi = D.r, 
+                r = NULL, theta = NULL, phi = NULL)
 }
 
 \arguments{
@@ -171,13 +171,13 @@ z.N     <- 3   # number of cells in z-direction
 
 D       <- 100 # diffusion coefficient
  
-r      <- seq(0,   8,len=r.N+1)         # cell size r-direction [cm]
-theta  <- seq(0,2*pi,len=theta.N+1)     # theta-direction - theta: from 0, 2pi
-phi    <- seq(0,2*pi,len= z.N+1)        # phi-direction (0,2pi)
-z      <- seq(0,5,len=z.N+1)            # cell size z-direction [cm]
+r      <- seq(0,   8, len = r.N+1)       # cell size r-direction [cm]
+theta  <- seq(0,2*pi, len = theta.N+1)   # theta-direction - theta: from 0, 2pi
+phi    <- seq(0,2*pi, len = z.N+1)       # phi-direction (0,2pi)
+z      <- seq(0,5, len = z.N+1)          # cell size z-direction [cm]
  
 # Intial conditions 
-C <- array(dim = c(r.N, theta.N, z.N), data=0)
+C <- array(dim = c(r.N, theta.N, z.N), data = 0)
 
 # Concentration boundary conditions
 tran.cylindrical (C = C, D.r = D, D.theta = D, 
@@ -216,12 +216,11 @@ tran.spherical(C = C, D.r = D, r = r, theta = theta, phi = phi)
 ## A model with diffusion and first-order consumption
 ## =============================================================================
 
-
 N     <- 10          # number of grid cells
 rr    <- 0.005       # consumption rate
 D     <- 400
 
-r       <- seq (2, 4, len=N+1)
+r       <- seq (2, 4, len = N+1)
 theta   <- seq (0, 2*pi, len = N+1)
 z       <- seq (0, 3, len = N+1)
 phi     <- seq (0, 2*pi, len = N+1)

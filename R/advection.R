@@ -1,6 +1,6 @@
 advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
                        flux.up = NULL, flux.down=NULL,
-                       v, VF=1, A =1,  dx,
+                       v, VF=1, A =1,  dx, dt.default = 1,
                        adv.method = c("muscl","super","quick","p3","up"),
                        full.check = FALSE) {
 
@@ -29,10 +29,11 @@ advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
   }
 
   # timestep this works only for latest version of deSolve  !
-  dt <- timestep()
-  if (is.nan(dt)) dt <- 0.001
-  if (dt == 0)    dt <- 0.001
-  if (dt > 1e30)  dt <- 0.001
+  dt <- timestep(prev=FALSE)
+#  print(dt)
+  if (is.nan(dt)) dt <- dt.default
+  if (dt < 1e-30) dt <- dt.default   # if dt is = 0 or ~0
+  if (dt > 1e30)  dt <- dt.default
 
   # velocity, grid sizes, volume fractions, surface areas
   v     <- rep(v, length.out = n+1)
@@ -42,8 +43,10 @@ advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
     dx <- dx$dx
   } else { 
     dx    <- rep(dx,length.out = n)
-    dx.aux<- 0.5*(c(0,rep(dx,length.out=n))+
-                  c(rep(dx,length.out=n),0))
+#    dx.aux<- 0.5*(c(0,rep(dx,length.out=n))+
+#                  c(rep(dx,length.out=n),0))
+    dx.aux <- rep(dx,length.out = n+1)
+
   }
   
   if (is.list(VF)) {
@@ -74,8 +77,8 @@ advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
    VFint, VFmid, Aint, Amid,
    as.integer(advmet), as.integer(1), dy=as.double(rep(0.,n)),
    cu=as.double(rep(0.,n+1)), it=as.integer(0), package = "ReacTran")
-
-  # return the "rate of cange" and the fluxes
+   
+  # return the "rate of change" and the fluxes
    list(dC=O$dy, adv.flux=O$cu, flux.up =O$cu[1], flux.down=O$cu[n+1], 
      it=O$it)
 }
@@ -86,7 +89,7 @@ advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
 
 advection.volume.1D <- function (C, C.up = C[1], C.down = C[length(C)],
                        F.up = NULL, F.down=NULL,
-                       flow, V,
+                       flow, V, dt.default = 1,
                        adv.method = c("muscl","super","quick","p3","up"),
                        full.check = FALSE) {
 
@@ -114,9 +117,9 @@ advection.volume.1D <- function (C, C.up = C[1], C.down = C[length(C)],
   }
 
   # timestep - this works only for latest version of deSolve  !
-  dt <- timestep()
-  if (dt == 0) dt <- 0.001
-  if (dt > 1e30) dt <- 0.001
+  dt <- timestep(prev = FALSE)
+  if (dt == 0)   dt <- dt.default
+  if (dt > 1e30) dt <- dt.default
   
   # velocity, grid sizes, volume fractions, surface areas
   flow  <- rep(flow, length.out = n+1)

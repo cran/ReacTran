@@ -13,22 +13,22 @@
 }
 
 \usage{
-tran.3D (C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
-  C.y.up=C[,1,],  C.y.down=C[,dim(C)[2],],
-  C.z.up=C[,,1],  C.z.down=C[,,dim(C)[3]],
-  flux.x.up=NULL, flux.x.down=NULL,
-  flux.y.up=NULL, flux.y.down=NULL,
-  flux.z.up=NULL, flux.z.down=NULL,
-  a.bl.x.up=NULL, a.bl.x.down=NULL, 
-  a.bl.y.up=NULL, a.bl.y.down=NULL, 
-  a.bl.z.up=NULL, a.bl.z.down=NULL, 
-  D.grid=NULL, D.x=NULL, D.y=D.x, D.z=D.x,
-  v.grid=NULL, v.x=0, v.y=0, v.z=0,
-  AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x, AFDW.z=AFDW.x,
-  VF.grid=NULL, VF.x=1, VF.y=VF.x, VF.z=VF.x,
-  A.grid=NULL, A.x=1, A.y=1, A.z=1,
-  grid=NULL, dx=NULL, dy=NULL, dz=NULL,
-  full.check = FALSE, full.output = FALSE)
+tran.3D (C, C.x.up = C[1,,], C.x.down = C[dim(C)[1],,],
+         C.y.up = C[ ,1, ],  C.y.down=C[ ,dim(C)[2], ],
+         C.z.up = C[ , ,1],  C.z.down=C[ , ,dim(C)[3]],
+         flux.x.up = NULL, flux.x.down = NULL,
+         flux.y.up = NULL, flux.y.down = NULL,
+         flux.z.up = NULL, flux.z.down = NULL,
+         a.bl.x.up = NULL, a.bl.x.down = NULL, 
+         a.bl.y.up = NULL, a.bl.y.down = NULL, 
+         a.bl.z.up = NULL, a.bl.z.down = NULL, 
+         D.grid = NULL, D.x = NULL, D.y = D.x, D.z = D.x,
+         v.grid = NULL, v.x = 0, v.y = 0, v.z = 0,
+         AFDW.grid = NULL, AFDW.x = 1, AFDW.y = AFDW.x, AFDW.z = AFDW.x,
+         VF.grid = NULL, VF.x = 1, VF.y = VF.x, VF.z = VF.x,
+         A.grid = NULL, A.x = 1, A.y = 1, A.z = 1,
+         grid = NULL, dx = NULL, dy = NULL, dz = NULL,
+         full.check = FALSE, full.output = FALSE)
 }
 
 \arguments{
@@ -295,34 +295,36 @@ tran.3D (C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
 ## =============================================================================
 ## Diffusion in 3-D; imposed boundary conditions
 ## =============================================================================
-diffusion3D <- function(t,Y,par) {
-  yy    <- array(dim=c(n,n,n),data=Y)  # vector to 3-D array
-  dY   <- -r*yy        # consumption
-  BND   <- matrix(nr=n,nc=n,1)   # boundary concentration
+diffusion3D <- function(t, Y, par) {
 
-  dY <- dY + tran.3D(C=yy,
-      C.x.up=BND, C.y.up=BND, C.z.up=BND,
-      C.x.down=BND,C.y.down=BND,C.z.down=BND,
-      D.x=Dx, D.y=Dy, D.z=Dz,
-      dx = dx, dy=dy, dz=dz,full.check=TRUE)$dC
-  return(list(as.vector(dY)))
+  yy    <- array(dim = c(n, n, n), data = Y)  # vector to 3-D array
+  dY    <- -r * yy                            # consumption
+  BND   <- matrix(nrow = n, ncol = n, 1)      # boundary concentration
+
+  dY <- dY + tran.3D(C = yy,
+      C.x.up = BND, C.y.up = BND, C.z.up = BND,
+      C.x.down = BND, C.y.down = BND, C.z.down = BND,
+      D.x = Dx, D.y = Dy, D.z = Dz,
+      dx = dx, dy = dy, dz = dz, full.check = TRUE)$dC
+  return(list(dY))
 }
 
 # parameters
-dy    <- dx <- dz <-1   # grid size
-Dy    <- Dx <- Dz <-1   # diffusion coeff, X- and Y-direction
-r     <- 0.025     # consumption rate
+dy   <- dx <- dz <- 1   # grid size
+Dy   <- Dx <- Dz <- 1   # diffusion coeff, X- and Y-direction
+r    <- 0.025     # consumption rate
 
 n  <- 10
-y  <- array(dim=c(n,n,n),data=10.)
+y  <- array(dim = c(n, n, n), data = 10.)
 
 print(system.time(
-  ST3 <- steady.3D(y,func=diffusion3D,parms=NULL,pos=TRUE,dimens=c(n,n,n),
-                 lrw=2000000, verbose=TRUE)
+  ST3 <- steady.3D(y, func = diffusion3D, parms = NULL, 
+                 pos = TRUE, dimens = c(n, n, n),
+                 lrw = 2000000, verbose = TRUE)
 ))
 
-y <- array(dim=c(n,n,n),data=ST3$y)
-filled.contour(y[,,n/2],color.palette=terrain.colors)
+y <- array(dim = c(n, n, n), data = ST3$y)
+filled.contour(y[ , ,n/2], color.palette = terrain.colors)
 
 
 }

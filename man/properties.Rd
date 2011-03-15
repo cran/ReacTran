@@ -4,7 +4,7 @@
 \alias{p.sig}
 
 \title{
-  Common Properties with Distance,to be used with setup.prop.1D
+  Common Properties with Distance, to be used with setup.prop.1D
 }
 
 \description{
@@ -43,9 +43,9 @@
 }
 
 \usage{
-p.exp(x, y.0=1, y.inf=0.5, x.L=0, x.att=1)
-p.lin(x, y.0=1, y.inf=0.5, x.L=0, x.att=1)
-p.sig(x, y.0=1, y.inf=0.5, x.L=0, x.att=1)
+p.exp(x, y.0 = 1, y.inf = 0.5, x.L = 0, x.att = 1)
+p.lin(x, y.0 = 1, y.inf = 0.5, x.L = 0, x.att = 1)
+p.sig(x, y.0 = 1, y.inf = 0.5, x.L = 0, x.att = 1)
 }
 
 \arguments{
@@ -88,10 +88,11 @@ p.sig(x, y.0=1, y.inf=0.5, x.L=0, x.att=1)
 
 \examples{
 
- x<- seq(0,5,len=100)
- plot(x, p.exp(x,x.L=2),xlab="x.coordinate", ylab="y value",ylim=c(0,1))
- lines(x, p.lin(x,x.L=2),col="blue")
- lines(x, p.sig(x,x.L=2),col="red")
+x <- seq(0, 5, len = 100)
+plot(x, p.exp(x, x.L = 2), 
+     xlab = "x.coordinate", ylab = "y value", ylim = c(0, 1))
+lines(x, p.lin(x, x.L = 2), col = "blue")
+lines(x, p.sig(x, x.L = 2), col = "red")
 }
  
 \keyword{utilities}

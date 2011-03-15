@@ -19,8 +19,8 @@
 \usage{
 
 g.sphere(x)
-g.spheroid (x, b=1)
-g.cylinder (x, L=1)
+g.spheroid (x, b = 1)
+g.cylinder (x, L = 1)
 
 }
 
@@ -49,15 +49,16 @@ g.cylinder (x, L=1)
 
 \examples{
 
- mf <- par(mfrow=c(3,2))
- x <- seq(from=0,to=1,length=10)
- plot(x, g.sphere(x)$surf,main="sphere surface")
- plot(x, g.sphere(x)$vol,main="sphere volume")
- plot(x, g.spheroid(x,b=0.5)$surf,main="spheroid surface")
- plot(x, g.spheroid(x,b=0.5)$vol,main="spheroid volume")
- plot(x, g.cylinder(x,L=1)$surf,main="cylinder surface")
- plot(x, g.cylinder(x,L=1)$vol,main="cylinder volume")
- par("mfrow"=mf)
+ mf <- par(mfrow = c(3, 2))
+ x  <- seq(from = 0, to = 1, length = 10)
+ plot(x, g.sphere(x)$surf, main = "sphere surface")
+ plot(x, g.sphere(x)$vol, main = "sphere volume")
+ plot(x, g.spheroid(x, b = 0.5)$surf, main = "spheroid surface")
+ plot(x, g.spheroid(x, b = 0.5)$vol, main = "spheroid volume")
+ plot(x, g.cylinder(x, L = 1)$surf, main = "cylinder surface")
+ plot(x, g.cylinder(x, L = 1)$vol, main = "cylinder volume")
+ par("mfrow" = mf)
+
 }
 \keyword{utilities}
 

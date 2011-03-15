@@ -18,7 +18,7 @@
 }
 
 \usage{
-fiadeiro(v, D, dx.aux=NULL, grid=list(dx.aux=dx.aux))
+fiadeiro(v, D, dx.aux = NULL, grid = list(dx.aux = dx.aux))
 }
 
 \arguments{
@@ -57,10 +57,10 @@ fiadeiro(v, D, dx.aux=NULL, grid=list(dx.aux=dx.aux))
 # and evaluate their effect on munerical diffusion. The model describes the
 # decay of organic carbon (OC) as it settles through the ocean water column.
 
-model <- function (time,OC,pars,AFDW=1)
-{
-dOC <- tran.1D(OC,flux.up=F_OC,D=D.eddy,v=v.sink,AFDW=AFDW,dx=dx)$dC - k*OC
-return(list(dOC))
+model <- function (time, OC, pars, AFDW = 1) {
+  dOC <- tran.1D(OC, flux.up = F_OC, D = D.eddy, 
+                 v = v.sink, AFDW = AFDW, dx = dx)$dC - k*OC
+  return(list(dOC))
 }
 #============================================
 # Parameter set
@@ -78,59 +78,53 @@ k <- 0.1          # decay coefficient [d-1]
 ## =============================================================================
 
 # Setting up the grid
-N <- 10                              # number of grid layers 
-dx <- L/N                            # thickness of boxes [m]
-dx.aux <- rep(dx,(N+1))              # auxilliary grid vector
-x.int <- seq(from=0,to=L,by=dx)      # water depth at box interfaces [m]
-x.mid <- seq(from=dx/2,to=L,by=dx)   # water depth at box centres [m]
+N <- 10                               # number of grid layers 
+dx <- L/N                             # thickness of boxes [m]
+dx.aux <- rep(dx, N+1)                # auxilliary grid vector
+x.int <- seq(from = 0, to = L, by = dx)    # water depth at box interfaces [m]
+x.mid <- seq(from = dx/2, to = L, by = dx) # water depth at box centres [m]
 
 # Exponentially declining sink velocity
-v.sink <- v.sink.0*exp(-x.int/x.att) # sink velocity [m d-1]
-Pe <- v.sink*dx/D.eddy               # Peclet number
+v.sink <- v.sink.0 * exp(-x.int/x.att) # sink velocity [m d-1]
+Pe <- v.sink * dx/D.eddy               # Peclet number
 
 # Calculate the weighing coefficients
-AFDW <- fiadeiro(v=v.sink,D=D.eddy,dx.aux=dx.aux)
+AFDW <- fiadeiro(v = v.sink, D = D.eddy, dx.aux = dx.aux)
 
-par(mfrow=c(2,1),cex.main=1.2,cex.lab=1.2)
+par(mfrow = c(2, 1), cex.main = 1.2, cex.lab = 1.2)
 
 # Plot the Peclet number over the grid 
 
-matplot(Pe,x.int,log="x",pch=19,ylim=c(L,0),xlim=c(0.1,1000), 
-xlab="",ylab="depth [m]",main=expression("Peclet number"),axes=FALSE)
+plot(Pe, x.int, log = "x", pch = 19, ylim = c(L,0), xlim = c(0.1, 1000), 
+     xlab = "", ylab = "depth [m]", 
+     main = "Peclet number", axes = FALSE)
 abline(h = 0)
-axis(pos=NA, side=2)
-axis(pos=0, side=3)
+axis(pos = NA, side = 2)
+axis(pos = 0, side = 3)
 
 # Plot the AFDW coefficients over the grid 
 
-matplot(AFDW,x.int,pch=19,ylim=c(L,0),xlim=c(0.5,1), 
-xlab="",ylab="depth [m]",main=expression("AFDW coefficient"),axes=FALSE)
+plot(AFDW, x.int, pch = 19, ylim = c(L, 0), xlim = c(0.5, 1), 
+     xlab = "", ylab = "depth [m]", main = "AFDW coefficient", axes = FALSE)
 abline(h = 0)
-axis(pos=NA, side=2)
-axis(pos=0, side=3)
+axis(pos = NA, side = 2)
+axis(pos = 0, side = 3)
 
 # Three steady-state solutions for a coarse grid based on:
 # (1) backward differences (BD)
 # (2) central differences (CD)
 # (3) Fiadeiro & Veronis scheme (FV)
 
-BD <- steady.band(y=runif(N), func=model, AFDW=1.0, nspec=1)$y
-CD <- steady.band(y=runif(N), func=model, AFDW=0.5, nspec=1)$y
-FV <- steady.band(y=runif(N), func=model, AFDW=AFDW, nspec=1)$y
-CONC <- cbind(BD,CD,FV)
+BD <- steady.1D(y = runif(N), func = model, AFDW = 1.0, nspec = 1)
+CD <- steady.1D(y = runif(N), func = model, AFDW = 0.5, nspec = 1)
+FV <- steady.1D(y = runif(N), func = model, AFDW = AFDW, nspec = 1)
 
-par(mfrow=c(1,2))
+# Plotting output - use rootSolve's plot method
+plot(BD, CD, FV, grid = x.mid, xyswap = TRUE, mfrow = c(1,2), 
+     xlab = "", ylab = "depth [m]", main = "conc (Low resolution grid)")
 
-# Plotting output
-matplot(CONC,x.mid,pch=16,type="b",ylim=c(L,0),
-xlab="",ylab="depth [m]",main=expression("conc (Low resolution grid)"),
-axes=FALSE)
-abline(h = 0)
-axis(pos=0, side=2)
-axis(pos=0, side=3)
-legend("bottomright",
-legend=c("backward diff","centred diff","Fiadeiro&Veronis")
-,col=c(1:3),lty=c(1:3),pch=c(16,16,16))
+legend("bottomright", col = 1:3, lty = 1:3,
+       legend = c("backward diff", "centred diff", "Fiadeiro&Veronis"))
 
 
 ## =============================================================================
@@ -140,42 +134,37 @@ legend=c("backward diff","centred diff","Fiadeiro&Veronis")
 # Setting up the grid
 N <- 1000                            # number of grid layers 
 dx <- L/N                            # thickness of boxes[m]
-dx.aux <- rep(dx,(N+1))              # auxilliary grid vector
-x.int <- seq(from=0,to=L,by=dx)      # water depth at box interfaces [m]
-x.mid <- seq(from=dx/2,to=L,by=dx)   # water depth at box centres [m]
+dx.aux <- rep(dx, N+1)              # auxilliary grid vector
+x.int <- seq(from = 0, to = L, by = dx)      # water depth at box interfaces [m]
+x.mid <- seq(from = dx/2, to = L, by = dx)   # water depth at box centres [m]
 
 # Exponetially declining sink velocity
-v.sink <- v.sink.0*exp(-x.int/x.att) # sink velocity [m d-1]
-Pe <- v.sink*dx/D.eddy               # Peclet number
+v.sink <- v.sink.0 * exp(-x.int/x.att) # sink velocity [m d-1]
+Pe <- v.sink * dx/D.eddy               # Peclet number
 
 # Calculate the weighing coefficients
-AFDW <- fiadeiro(v=v.sink,D=D.eddy,dx.aux=dx.aux)
+AFDW <- fiadeiro(v = v.sink, D = D.eddy, dx.aux = dx.aux)
 
 # Three steady-state solutions for a coarse grid based on:
 # (1) backward differences (BD)
 # (2) centered differences (CD)
 # (3) Fiadeiro & Veronis scheme (FV)
 
-BD <- steady.band(y=runif(N), func=model, AFDW=1.0, nspec=1)$y
-CD <- steady.band(y=runif(N), func=model, AFDW=0.5, nspec=1)$y
-FV <- steady.band(y=runif(N), func=model, AFDW=AFDW, nspec=1)$y
-HR_CONC <- cbind(BD,CD,FV)
+BD <- steady.1D(y = runif(N), func = model, AFDW = 1.0, nspec = 1)
+CD <- steady.1D(y = runif(N), func = model, AFDW = 0.5, nspec = 1)
+FV <- steady.1D(y = runif(N), func = model, AFDW = AFDW, nspec = 1)
 
 # Plotting output
-matplot(HR_CONC,x.mid,pch=16,type="b",ylim=c(L,0),
-xlab="",ylab="depth [m]",main=expression("conc (High resolution grid)"),
-axes=FALSE)
-abline(h = 0)
-axis(pos=0, side=2)
-axis(pos=0, side=3)
-legend("bottomright",
-legend=c("backward diff","centred diff","Fiadeiro&Veronis")
-,col=c(1:3),lty=c(1:3),pch=c(16,16,16))
+plot(BD, CD, FV, grid = x.mid, xyswap = TRUE, mfrow = NULL, 
+     xlab = "", ylab = "depth [m]", main = "conc (High resolution grid)")
+
+legend("bottomright", col = 1:3, lty = 1:3,
+       legend = c("backward diff", "centred diff", "Fiadeiro&Veronis"))
 
 # Results and conclusions:
 # - For the fine grid, all three solutions are identical
 # - For the coarse grid, the BD and FV solutions show numerical dispersion
-#   while the CD is stable and provides more accurate results
+#   while the CD provides more accurate results
 }
 
 \references{

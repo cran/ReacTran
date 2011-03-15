@@ -14,7 +14,7 @@ C input
 
 C Boundary concentrations (used if Bc..=2,4), fluxes (used if Bc= 1) 
 C and convection coeff (used if Bc=4)
-	DOUBLE PRECISION Cup, Cdown, fluxup, fluxdown, aup, adown
+      DOUBLE PRECISION Cup, Cdown, fluxup, fluxdown, aup, adown
 
 C Diffusion, volume fraction, surface Area
       DOUBLE PRECISION D(N+1), VF(N+1), A(N+1)

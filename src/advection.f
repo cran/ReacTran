@@ -59,7 +59,7 @@ c  rate of change due to advection
 
       DOUBLE PRECISION         :: one6th=1.0d0/6.0d0
 c maximal number of iterations
-      INTEGER, parameter       :: itmax=100
+      INTEGER, parameter       :: itmax=10000
 
 c  LOCAL VARIABLES:
       integer                  :: i,k,it
@@ -86,8 +86,12 @@ c  compute maximum Courant number; estimate nr of iterations
         if (c.gt.cmax) cmax=c
       enddo
 
-      it=min(itmax,int(cmax)+1)
-
+      if (cmax . GT. 1) then 
+        it =  min(itmax,int(cmax)+1)   ! WAS: min(itmax,int(cmax)+1)
+          it = max(1,it)
+      else 
+        it = 1
+      endif   
 c  (time) splitting loop
       do i=1,it
 

@@ -83,12 +83,24 @@ setup.prop.1D <- function(func = NULL, value = NULL, xy = NULL,
 ##==============================================================================
 ## S3 method: Plotting of a one-dimensional grid property
 ##==============================================================================
+setdots <- function (dots, default) {
+  dots <- if (is.null(dots)) default else dots
+}
 
 
 plot.prop.1D <- function(x, grid, xyswap =FALSE, ...) {
-  if (xyswap)
-    plot(x$int, grid$x.int, ylim = rev(range(grid$x.int)),
-      xlab="prop",ylab="x",...)
-  else
-    plot(grid$x.int,x$int, ylab="prop",xlab="x",...)
+  dots <- list(...)
+     
+  if (xyswap) {
+    dots$ylim <- setdots(dots$ylim, rev(range(grid$x.int)))
+    dots$xlab <- setdots(dots$xlab, "prop")
+    dots$ylab <- setdots(dots$ylab, "x")
+    List <- alist(x = x$int, y = grid$x.int)
+  } else {
+    dots$xlab <- setdots(dots$xlab, "x")
+    dots$ylab <- setdots(dots$ylab, "prop")
+    List <- alist(x = grid$x.int, y = x$int)
+  }    
+  do.call(plot, c(List, dots))
+
 }

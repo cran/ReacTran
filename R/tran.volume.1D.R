@@ -109,7 +109,7 @@ tran.volume.1D <- function(C, C.up=C[1], C.down=C[length(C)],
 
   ## 2. flow.lat contains numeric values - check length; should be N;
   ##    flow should contain upstream flow (one value); create flows at interface
-  { if (!is.vector(flow.lat$mid)) flow.lat$mid <- rep(flow.lat$mid,length.out=N)
+  { if (!is.vector(flow.lat$mid) || length(flow.lat$mid) == 1) flow.lat$mid <- rep(flow.lat$mid,length.out=N)
 
     if (length(flow.lat$mid) != N)
       stop ("flow.lat should be one number or a vector of length = N")

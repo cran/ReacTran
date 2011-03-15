@@ -172,7 +172,7 @@ C Rate of change in r-direction
      &          -(Flux(I+1,J,K)*(r(I+1)**2.)-Flux(I,J,K)*(r(I)**2.))             &
      &                  /dr(I)/(rc(I)**2.)
             ELSE
- 	        dC(I,J,K) = 0.D0
+              dC(I,J,K) = 0.D0
             ENDIF
           ENDDO
         ENDDO
@@ -187,9 +187,9 @@ C First diffusion internal cells
             IF(rc(I) .NE. 0.D0) THEN                                             
               Flux(I,J,K) = -D_tet(J)*(C(I,J,K)-C(I,J-1,K)) /dtetaux(J)            &
      &                    /rc(I) 
-	      ELSE
+            ELSE
               Flux(I,J,K) = 0.D0
-	      ENDIF
+            ENDIF
           ENDDO
         ENDDO 
       ENDDO
@@ -222,7 +222,7 @@ C upstream teta-boundary
         DO I = 1, Nr
           DO K = 1, Nphi
             
-		  IF(rc(I) .NE. 0.D0) THEN
+            IF(rc(I) .NE. 0.D0) THEN
 
               Cbound = (C(I,1,K)   *D_tet(1)     *dtetaux(Ntet+1) +              &
      &               C(I,Ntet,K)*D_tet(Ntet+1)*dtetaux(1)        )/              &
@@ -231,7 +231,7 @@ C upstream teta-boundary
      &                                         /dtetaux(1)/rc(I) 
               Flux(I,Ntet+1,K) = -D_tet(Ntet+1)*(Cbound-C(I,Ntet,K))             & 
      &                                       /dtetaux(Ntet+1)/rc(I) 
-	      ENDIF
+            ENDIF
 
           ENDDO
         ENDDO
@@ -256,7 +256,7 @@ C downstream teta-boundary
       ELSE IF (BcTetdown .EQ. 2) THEN
         DO I = 1, Nr
           DO K = 1, Nphi
-		  IF(rc(I) .NE. 0.D0) THEN
+            IF(rc(I) .NE. 0.D0) THEN
             Flux(I,Ntet+1,K) = -D_tet(Ntet+1) * (Ctetdown-C(I,Ntet,K))           & 
      &                                           /dtetaux(Ntet+1)/rc(I) 
             ENDIF 
@@ -294,11 +294,11 @@ C First diffusion internal cells
       DO I = 1, Nr
         DO J = 1, Ntet
           DO K = 2, Nphi
-		  IF(rc(I) * sin(tet(J)) .NE. 0.D0) THEN
+            IF(rc(I) * sin(tet(J)) .NE. 0.D0) THEN
               Flux(I,J,K) = -D_phi(J)*(C(I,J,K)-C(I,J,K-1))                      &
      &                           /dphiaux(K)  /rc(I)/sin(tet(j))  
             ELSE
-	        Flux(I,J,K) = 0.D0
+              Flux(I,J,K) = 0.D0
             ENDIF
           ENDDO
         ENDDO 

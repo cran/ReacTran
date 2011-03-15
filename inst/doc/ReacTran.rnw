@@ -200,9 +200,9 @@ options(width=75)
   Function \code{setup.grid.1D} creates a grid, which can comprise several
   zones:
   \begin{verbatim}
-  setup.grid.1D <- function(x.up=0,	x.down=NULL, L=NULL, N=NULL,
-     dx.1 =NULL, p.dx.1 = rep(1,length(L)), max.dx.1 = L,
-     dx.N =NULL, p.dx.N = rep(1,length(L)), max.dx.N = L)
+  setup.grid.1D <- function(x.up = 0,	x.down = NULL, L = NULL, N = NULL,
+     dx.1 = NULL, p.dx.1 = rep(1,length(L)), max.dx.1 = L,
+     dx.N = NULL, p.dx.N = rep(1,length(L)), max.dx.N = L)
   \end{verbatim}
   with the following arguments:
   \begin{itemize}
@@ -238,7 +238,7 @@ options(width=75)
   first box of size 1 km, we write \footnote{note that by embracing the
   statement within brackets, we execute it AND print the result to the screen}:
 <<>>=
- (grid<-setup.grid.1D(L=100,dx.1=1,N=50))
+ (grid <- setup.grid.1D(L = 100, dx.1 = 1, N = 50))
 @
 which can be plotted as follows:
 <<label=Grid,include=FALSE>>=
@@ -264,8 +264,8 @@ which can be plotted as follows:
   These properties can be generated conform a previously defined grid
   with \rt function \code{setup.prop.1D}. Its syntax is:
   \begin{verbatim}
-  setup.prop.1D(func=NULL, value=NULL, xy=NULL,
-    interpolate="spline", grid, ...)
+  setup.prop.1D(func = NULL, value = NULL, xy = NULL,
+    interpolate = "spline", grid, ...)
   \end{verbatim}
   They can be specified as a function, or as a (constant) value, or as
   an (x,y) data series, which is interpolated using a spline or linearly.
@@ -292,9 +292,9 @@ which can be plotted as follows:
   calculate a bioturbation profile, assuming there is a constant bioturbation
   in an upper layer (2 cm), declining exponentially below this layer.:
 <<>>=
-
- grid <- setup.grid.1D(L=10,N=100)
- Db   <- setup.prop.1D(func=p.exp,grid=grid,y.0=5,y.inf=0,x.L= 2)
+grid <- setup.grid.1D(L = 10, N = 100)
+Db   <- setup.prop.1D(func = p.exp, grid = grid, 
+                      y.0 = 5, y.inf = 0, x.L = 2)
 @
 
   We then define a function (\code{exp.inc}) that specifies an
@@ -304,11 +304,10 @@ which can be plotted as follows:
   be calculated using \code{p.exp}.
 
 <<>>=
- exp.inc <- function(x,y.0=1,y.inf=0.5,x.L=0,x.att=1)
-       return(1-p.exp(x,y.0,y.inf,x.L,x.att))
+exp.inc <- function(x, y.0 = 1, y.inf = 0.5, x.L = 0, x.att = 1)
+       return(1 - p.exp(x, y.0, y.inf, x.L, x.att))
 
- VFsolid <- setup.prop.1D(func=exp.inc,grid=grid,y.0=0.9,y.inf=0.7)
-
+VFsolid <- setup.prop.1D(func = exp.inc, grid = grid, y.0 = 0.9, y.inf = 0.7)
 @
 
   A \code{plot} method is defined for class \code{prop.1D}; to invoke it
@@ -316,10 +315,10 @@ which can be plotted as follows:
   \code{xyswap=TRUE} swaps the x- and y-axis, which is useful
   for plotting vertical profiles.
 <<label=prop,include=FALSE>>=
-  par(mfrow=c(1,2))
-  plot(VFsolid,grid,xyswap=TRUE,type="l",main="1-porosity")
-  plot(Db,grid,xyswap=TRUE,type="l",main="Db")
-  par(mfrow=c(1,1))
+par(mfrow = c(1, 2))
+plot(VFsolid, grid, xyswap = TRUE, type = "l", main = "1-porosity")
+plot(Db, grid, xyswap = TRUE, type = "l", main = "Db")
+par(mfrow = c(1, 1))
 @
 
 \setkeys{Gin}{width=0.6\textwidth}
@@ -401,8 +400,8 @@ which can be plotted as follows:
   
   For example:
 <<>>=
-tran.1D(C=1:20, D=0, flux.up = 1, v=1, dx=1)
-tran.1D(C=1:20, D=0, flux.up = 1, v=1, dx=1, full.output=TRUE)
+tran.1D(C = 1:20, D = 0, flux.up = 1, v = 1, dx = 1)
+tran.1D(C = 1:20, D = 0, flux.up = 1, v = 1, dx = 1, full.output = TRUE)
 @
   \subsection{A 1-D reaction transport model}
   Function \code{tran.1D} estimates the \emph{rate of change} of substances
@@ -436,23 +435,22 @@ tran.1D(C=1:20, D=0, flux.up = 1, v=1, dx=1, full.output=TRUE)
   can be implemented in \R as:
 
 <<>>=
-    parms <- c(F0 = 1, v = 1, k = 0.1, dx = 1)
+parms <- c(F0 = 1, v = 1, k = 0.1, dx = 1)
 @
 <<>>=
-    advModel <- function(t, C, parms) {
+advModel <- function(t, C, parms) {
     
-      with (as.list(parms), {
+   with (as.list(parms), {
 
-        Tran <- tran.1D(C=C, D=0, flux.up = F0, v=v, dx=dx)
-        Consumption <-  k*C
-        dC   <- Tran$dC - Consumption
+     Tran <- tran.1D(C = C, D = 0, flux.up = F0, v = v, dx = dx)
+     Consumption <-  k*C
+     dC   <- Tran$dC - Consumption
         
-        return (list(dC = dC, Consumption= Consumption,
-                     flux.up = Tran$flux.up, flux.down = Tran$flux.down))
+     return (list(dC = dC, Consumption= Consumption,
+                  flux.up = Tran$flux.up, flux.down = Tran$flux.down))
       })
 
     }
-
 @
 
   Note the use of \code{with (as.list(parms),...} which allows to access by
@@ -470,9 +468,8 @@ tran.1D(C=1:20, D=0, flux.up = 1, v=1, dx=1, full.output=TRUE)
 
   To solve the above model to steady-state, we invoke \code{steady.1D}:
 <<>>=
-  out <- steady.1D(func=advModel, y=runif(25), parms=parms,
-                     nspec=1, positive=TRUE)
-
+out <- steady.1D(func = advModel, y = runif(25), parms = parms,
+                 nspec = 1, positive = TRUE)
 @
   Function \code{steady.1D} estimates the steady-state iteratively and
   requires an initial guess of the state variables. For most cases, the
@@ -496,9 +493,9 @@ tran.1D(C=1:20, D=0, flux.up = 1, v=1, dx=1, full.output=TRUE)
 <<>>=
 out
 @
-  It can be plotted as:
+  It can be plotted using \code{rootSolve}s \code{plot} method:
 <<label=st1,include=FALSE>>=
-plot (out$y ,type="l",xlab="x", ylab="Conc")
+plot (out, xlab = "x", ylab = "Conc", main = "advection")
 @
 
 \setkeys{Gin}{width=0.4\textwidth}
@@ -542,16 +539,15 @@ with (out, print(sum(Consumption)-(flux.up-flux.down)))
 
 <<>>=
 
-Aggregate.Model <- function(time,O2,pars) {
+Aggregate.Model <- function(time, O2, pars) {
 
-  tran <- tran.1D(C=O2, C.down=C.ow.O2,
-    D=D.grid, A=A.grid,
-    VF=por.grid, dx=grid )
+  tran <- tran.1D(C = O2, C.down = C.ow.O2,
+                  D = D.grid, A = A.grid,
+                  VF = por.grid, dx = grid )
 
   reac <- - R.O2*(O2/(Ks+O2))
   return(list(dCdt = tran$dC + reac, reac = reac,
               flux.up = tran$flux.up, flux.down = tran$flux.down))
-
 }
 @
 
@@ -568,13 +564,14 @@ Ks      <- 0.005    # O2 saturation constant [micromol cm-3]
 <<>>=
 R <- 0.025           # radius of the agggregate [cm]
 N <- 100             # number of grid layers
-grid <- setup.grid.1D(x.up=0,L=R,N=N)
+
+grid <- setup.grid.1D(x.up = 0, L = R, N = N)
 @
   We assume that porosity (the volume fraction) and the diffusion
-  coefficient are constant. Both properties ae defined as a grid list.
+  coefficient are constant. Both properties are defined as a grid list.
 <<>>=
-por.grid <- setup.prop.1D(value=por,grid=grid)
-D.grid <- setup.prop.1D(value=D,grid=grid)
+por.grid <- setup.prop.1D(value = por, grid = grid)
+D.grid <- setup.prop.1D(value = D, grid = grid)
 @
 
   In this model, each "grid cell" is equivalent to a thin spherical region;
@@ -585,25 +582,22 @@ D.grid <- setup.prop.1D(value=D,grid=grid)
   calculates the surface of a sphere.
 
 <<>>=
-sphere.surf <- function (x) 4*pi*x^2
-A.grid  <- setup.prop.1D(func=sphere.surf,grid=grid)
+sphere.surf <- function (x)   4*pi*x^2
+
+A.grid  <- setup.prop.1D(func = sphere.surf, grid = grid)
 @
 
 The model is then solved to steady-state
 <<>>=
-O2.agg <- steady.1D (y = runif(N), func=Aggregate.Model, nspec=1,
-                     positive=TRUE, atol=1e-10)
+O2.agg <- steady.1D (y = runif(N), func = Aggregate.Model, nspec = 1,
+                     positive = TRUE, atol = 1e-10)
 @
 
 and the output plotted
 <<label=agg,include=FALSE>>=
-par(mfrow=c(1,1))
-
-plot(grid$x.mid,O2.agg$y,xlab="distance from centre, cm",
-ylab="mmol/m3",
-main="Diffusion-reaction of O2 in a spherical aggregate")
-legend ("bottomright",pch=c(1,18),lty=1,col=c("black"),
-        c("O2 concentration"))
+plot(O2.agg, grid = grid$x.mid, xlab = "distance from centre, cm", 
+     ylab = "mmol/m3", 
+     main = "Diffusion-reaction of O2 in a spherical aggregate")
 @
 
 \setkeys{Gin}{width=0.4\textwidth}
@@ -643,7 +637,7 @@ legend ("bottomright",pch=c(1,18),lty=1,col=c("black"),
   The total flux into the aggregate equals the flux per unit surface times
   the surface area at the downstream boundary:
 <<>>=
- (Fluxin <- - O2.agg$flux.down*A.grid$int[N+1])
+ (Fluxin <- - O2.agg$flux.down * A.grid$int[N+1])
 @
 
   The flux equals the total consumption, up to a certain numerical precision,
@@ -698,8 +692,8 @@ legend ("bottomright",pch=c(1,18),lty=1,col=c("black"),
   The default input for the \code{tran.volume1D()} function in \proglang{R} is:
   \begin{verbatim}
     tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
-      C.lat=0, F.up=NULL, F.down=NULL, F.lat=NULL,
-      Disp=NULL, flow = 0, flow.lat=NULL, AFDW = 1, V=NULL,
+      C.lat = 0, F.up = NULL, F.down = NULL, F.lat = NULL,
+      Disp = NULL, flow = 0, flow.lat = NULL, AFDW = 1, V = NULL,
       full.check = FALSE, full.output = FALSE)
   \end{verbatim}
   with the following arguments:
@@ -732,15 +726,16 @@ legend ("bottomright",pch=c(1,18),lty=1,col=c("black"),
   The model is formulated in function \code{river.model}
 
 <<>>=
-river.model <- function (t=0,OC,pars=NULL)
-{
-  tran <- tran.volume.1D(C=OC,F.up=F.OC,F.lat=F.lat,Disp=Disp,
-      flow=flow,V=Volume)
+river.model <- function (t = 0, OC, pars = NULL)  {
+
+  tran <- tran.volume.1D(C = OC, F.up = F.OC, F.lat = F.lat, 
+                         Disp = Disp, flow = flow, V = Volume,
+                         full.output = TRUE)
   reac <- - k*OC
 
   return(list(dCdt = tran$dC + reac,
             F.up = tran$F.up, F.down = tran$F.down,
-            F.lat = sum(tran$F.lat)))
+            F.lat = tran$F.lat))
 }
 @
 
@@ -755,7 +750,7 @@ BoxLength     <- lengthEstuary/nbox # [m]
   the estuarine mouth (\code{CrossArea}); based on this area and
   the lenght of a box, the volume of each box is easily estimated.
 <<>>=
-Distance      <- seq(BoxLength/2, by=BoxLength, len=nbox) # [m]
+Distance      <- seq(BoxLength/2, by = BoxLength, len = nbox) # [m]
 
 CrossArea <- 4000 + 72000 * Distance^5 /(Distance^5+50000^5)
 
@@ -779,38 +774,40 @@ k       <- 10/(365*24*3600)  # decay constant organic carbon [s-1]
 @
   In the first scenario, the lateral flux of material is zero.
 <<>>=
-F.lat <- rep(0,length.out=nbox)
+F.lat <- rep(0, length.out = nbox)
 @
   The model is solved using \rs function \code{steady.1D} which finds the
   steady-state solution, given an initial guess, \code{y}
   (here simply 500 random numbers).
 <<>>=
-sol  <- steady.1D(y=runif(nbox), fun=river.model, nspec=1, atol=1e-15,
-                    rtol=1e-15, positive = TRUE)
-Conc1 <- sol$y
+sol  <- steady.1D(y = runif(nbox), fun = river.model, nspec = 1,
+                  atol = 1e-15, rtol = 1e-15, positive = TRUE)
 @
   In the second scenario, there is lateral input of organic carbon:
 <<>>=
-F.lat <- F.lat.0*dnorm(x=Distance/lengthEstuary,
+F.lat <- F.lat.0*dnorm(x = Distance/lengthEstuary,
                        mean = Distance[nbox/2]/lengthEstuary,
                        sd = 1/20, log = FALSE) /nbox
-sol2<- steady.1D(runif(nbox), fun=river.model, nspec=1, atol=1e-15,
-                    rtol=1e-15, positive = TRUE)
-Conc2 <- sol2$y
+sol2 <- steady.1D(y = runif(nbox), fun = river.model, nspec = 1, 
+                  atol = 1e-15, rtol = 1e-15, positive = TRUE)
 @
 We set the tolerances for the steady-state calculation (\code{atol} and
 \code {rtol}) to a very small value so that the mass budget is very tight
 (see below).
 
-Finally the output is plotted.
+The summary for the outputs shows the ranges, means and standard deviations
+of all quantities:
+<<>>=
+summary(sol)
+summary(sol2)
+@
+Finally the output is plotted, using rootSolve's \code{plot} method.
 
 <<label=est,include=FALSE>>=
-matplot(Distance/1000,cbind(Conc1,Conc2),lwd=2,
-main="Organic carbon decay in an estuary",xlab="distance [km]",
-ylab="OC Concentration [mM]",
-type="l")
-legend ("topright",lty=1,col=c("black","red"),
-        c("baseline","with lateral input"))
+plot(sol, sol2, grid = Distance/1000, lwd = 2,
+        main = "Organic carbon decay in an estuary",xlab = "distance [km]",
+        ylab = "OC Concentration [mM]")
+legend ("topright", col = 1:2, lwd = 2, c("baseline", "with lateral input"))
 @
 \setkeys{Gin}{width=0.4\textwidth}
 \begin{figure}
@@ -826,7 +823,7 @@ legend ("topright",lty=1,col=c("black","red"),
 and a budget estimated
 (total input = consumption)
 <<>>=
-sol$F.up + sol$F.lat - sol$F.down - sum(sol$y*k*Volume)
+sum(sol$F.up) + sum(sol$F.lat) - sum(sol$F.down) - sum(sol$y*k*Volume)
 @
 \clearpage
   \section{Transport in two dimensions}
@@ -836,16 +833,18 @@ sol$F.up + sol$F.lat - sol$F.down - sum(sol$y*k*Volume)
   
   Here is its default input
 \begin{verbatim}
-tran.2D ( C, C.x.up=C[1,], C.x.down=C[nrow(C),],
-  C.y.up=C[,1], C.y.down=C[,ncol(C)],
-  flux.x.up=NULL, flux.x.down=NULL, flux.y.up=NULL, flux.y.down=NULL,
-  a.bl.x.up=NULL, a.bl.x.down=NULL, a.bl.y.up=NULL, a.bl.y.down=NULL,  
-  D.grid=NULL, D.x=NULL, D.y=D.x,
-  v.grid=NULL, v.x=0, v.y=0,
-  AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x,
-  VF.grid=NULL,VF.x=1, VF.y=VF.x,
-  A.grid=NULL, A.x=1, A.y=1,
-  grid=NULL, dx=NULL, dy=NULL,
+tran.2D ( C, C.x.up = C[1,], C.x.down = C[nrow(C),],
+  C.y.up = C[,1], C.y.down = C[,ncol(C)],
+  flux.x.up = NULL, flux.x.down = NULL, 
+  flux.y.up = NULL, flux.y.down = NULL,
+  a.bl.x.up = NULL, a.bl.x.down = NULL, 
+  a.bl.y.up = NULL, a.bl.y.down = NULL,  
+  D.grid = NULL, D.x = NULL, D.y = D.x,
+  v.grid = NULL, v.x = 0, v.y = 0,
+  AFDW.grid = NULL, AFDW.x = 1, AFDW.y = AFDW.x,
+  VF.grid = NULL, VF.x = 1, VF.y = VF.x,
+  A.grid = NULL, A.x = 1, A.y = 1,
+  grid = NULL, dx = NULL, dy = NULL,
   full.check = FALSE, full.output = FALSE)
 
 }
@@ -898,28 +897,26 @@ vx    <- 1         # advection
   As initial concentrations we assume that oxygen is 0 everywhere.
 
 <<>>=
-y  <- matrix(nr=n,nc=n,0)
+y  <- matrix(nrow = n, ncol = n, 0)
 @
   In the model function, the state variables are passed as one vector
   (\code{y}). They are recast as a matrix first (\code{CONC}).
 <<>>=
-Diff2D <- function (t, y, parms, N)
+Diff2D <- function (t, y, parms, N) {
 
-{
-  CONC <- matrix(nr=N, nc=N, y)
+  CONC <- matrix(nrow = N, ncol = N, y)
 # Transport
-
-   Tran    <-tran.2D(CONC, D.x=Dx, D.y=Dy, C.y.down=Bc,
-                     dx=dx, dy=dy, v.x = vx)
+  Tran    <-tran.2D(CONC, D.x = Dx, D.y = Dy, C.y.down = Bc,
+                    dx = dx, dy = dy, v.x = vx)
 
 # transport + reaction
-   dCONC   <- Tran$dC + r*CONC
+  dCONC   <- Tran$dC + r*CONC
 
 # Bioirrigation in a central spot
-    mid <- N/2
-    dCONC[mid,mid] <- dCONC[mid,mid]  + irr*(Bc-CONC[mid,mid])
+  mid <- N/2
+  dCONC[mid, mid] <- dCONC[mid, mid]  + irr*(Bc - CONC[mid, mid])
 
-  return (list(as.vector(dCONC)))
+  return (list(dCONC))
 }
 @
   The model is solved in two ways.
@@ -936,22 +933,25 @@ Diff2D <- function (t, y, parms, N)
   
 <<>>=
 print(system.time(
-std  <-  steady.2D(func=Diff2D, y=as.vector(y), time=0, N=n,
-          parms=NULL, lrw=1000000, dimens=c(n,n),
-          nout=0, positive=TRUE)
+ std  <- steady.2D(func = Diff2D, y = as.vector(y), time = 0, N = n,
+                   parms = NULL, lrw = 1000000, dimens = c(n, n),
+                   nout = 0, positive = TRUE)
 ))
 @
   We run the model for 200 time units, producing output every 5 units.
 <<>>=
-times <- seq(0,100,5)
+times <- seq(0, 100, 5)
 print(system.time(
-  out2  <-  ode.2D(func=Diff2D, y=as.vector(y), times=times, N=n,
-            parms=NULL, lrw=10000000, dimens=c(n,n))
+  out2 <- ode.2D(func = Diff2D, y = as.vector(y), times = times, N = n,
+                 parms = NULL, lrw = 10000000, dimens = c(n, n))
 ))
 @
+We use method \code{select} to get the values of O2 after 20 days, and plot the 
+concentrations using \code{filled.contour}
 <<label=twod5,include=FALSE>>=
-mat  <-  matrix(nr=n,nc=n,out2[5,-1])
-filled.contour(mat,zlim=c(0,Bc), color=femmecol,main="after 20 time units")
+mat <- matrix(nrow = n, ncol = n, subset(out2, time ==  20))
+filled.contour(mat, zlim = c(0, Bc), color = femmecol,
+               main = "after 20 time units")
 @
 \setkeys{Gin}{width=0.4\textwidth}
 \begin{figure}
@@ -964,9 +964,9 @@ filled.contour(mat,zlim=c(0,Bc), color=femmecol,main="after 20 time units")
 irrigation model, after 20 time units - see text for \R-code}
 \label{fig:twod}
 \end{figure}
+It is simple to plot the steady-state solution:
 <<label=twodst,include=FALSE>>=
-mat  <-  matrix(nr=n,nc=n,std$y)
-filled.contour(mat,zlim=c(0,Bc), color=femmecol,main="steady-state")
+image (std, main = "steady-state", legend = TRUE)
 @
 \setkeys{Gin}{width=0.4\textwidth}
 \begin{figure}

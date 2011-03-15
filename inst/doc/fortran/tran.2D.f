@@ -356,7 +356,7 @@ C concentration
       DOUBLE PRECISION C(Nr,Ntet)
 
 C used when Bc.. = 2, should be a vector then, else one number
-	DOUBLE PRECISION Crup(*), Crdown(*), Ctetup(*), Ctetdown(*)
+      DOUBLE PRECISION Crup(*), Crdown(*), Ctetup(*), Ctetdown(*)
 
 C used when Bc.. = 1, should be a vectorthen , else one number
       DOUBLE PRECISION Frup(*), Frdown(*), Ftetup(*), Ftetdown(*)
@@ -416,7 +416,7 @@ C First diffusion internal cells
 C Then the outer cells - depending on boundary type
 C upstream r-boundary
       
-	IF (Bcrup .EQ. 1) THEN
+      IF (Bcrup .EQ. 1) THEN
         DO J = 1, Ntet 
           Fluxr(1,J) = Frup(J)
         ENDDO
@@ -430,12 +430,12 @@ C upstream r-boundary
         Fluxr(1,:) = 0.D0
 
       ELSE IF (Bcrup .EQ. 5) THEN
-	  DO J = 1, Ntet
-	    Crup(J) = (C(1,J)*draux(Nr+1) + C(Nr,J)*draux(1))  /                  &
+        DO J = 1, Ntet
+          Crup(J) = (C(1,J)*draux(Nr+1) + C(Nr,J)*draux(1))  /                  &
      &              (draux(1)+draux(Nr+1))
-	    Crdown(J) = Crup(J)
+          Crdown(J) = Crup(J)
           Fluxr(1,J) = -D_r(1)*(C(1,J)-Crup(J))/draux(1)
-	  ENDDO
+        ENDDO
 
       ENDIF
        
@@ -492,12 +492,12 @@ C upstream teta-boundary
         Fluxtet(:,1) = 0.D0
 
       ELSE IF (BcTetup .EQ. 5) THEN
-	  DO I = 1, Nr
-	    Ctetup(I) = (C(I,1)*dtetaux(Ntet+1) + C(I,Ntet)*dtetaux(1)) /         &
+        DO I = 1, Nr
+          Ctetup(I) = (C(I,1)*dtetaux(Ntet+1) + C(I,Ntet)*dtetaux(1)) /         &
      &              (dtetaux(1)+dtetaux(Ntet+1))
-	    Ctetdown(I) = Ctetup(I)
+          Ctetdown(I) = Ctetup(I)
           Fluxtet(I,1) = -D_tet(1)*(C(I,1)-Ctetup(I))/dtetaux(1)/rc(I) 
-	  ENDDO
+        ENDDO
 
       ENDIF
 
