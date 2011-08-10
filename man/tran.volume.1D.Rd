@@ -55,7 +55,10 @@ tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
   \item{Disp }{BULK dispersion coefficient, defined on grid cell interfaces.
     One value, a vector of length N+1, or a 1D list property as defined by \code{\link{setup.prop.1D}} [L3/T].
   }
-  \item{flow }{water flow rate, defined on grid cell interfaces. One value, a vector of length N+1, or a list as defined by \code{\link{setup.prop.1D}} [L3/T]. If \code{flow.lat} is not \code{NULL} the \code{flow} should be one value containing the flow rate at the upstream boundary. If \code{flow.lat} is not \code{NULL} then \code{flow} must be a vector or a list.
+  \item{flow }{water flow rate, defined on grid cell interfaces. One value, a vector of length N+1, 
+   or a list as defined by \code{\link{setup.prop.1D}} [L3/T]. 
+   If \code{flow.lat} is not \code{NULL} the \code{flow} should be one value containing the flow rate at the upstream boundary. 
+   If \code{flow.lat} is not \code{NULL} then \code{flow} must be a vector or a list.
   }
   \item{flow.lat }{lateral water flow rate [L3/T] into each volume box, defined at grid cell centres. One value, a vector of
     length N, or a list as defined by \code{\link{setup.prop.1D}}. If \code{flow.lat} has a value, then
@@ -95,22 +98,21 @@ tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
   \item{F.lat }{lateral mass input per volume box, positive = INTO model
     domain. A vector of length N [M/T].
   }
-  \item{F }{mass flow across at the interface of each grid cell. A vector
-    of length N+1 [M/T]. Only provided when (\code{full.output} = \code{TRUE}
+  \item{flow }{water flow across the interface of each grid cell. A vector
+    of length N+1 [L3/T]. Only provided when (\code{full.output} = \code{TRUE}
   }
-  \item{flow.up }{water flow across the upstream boundary, positive = INTO
-    model domain. One value [L3/T]. Only provided when
-    (\code{full.output} = \code{TRUE})
+  \item{flow.up }{water flow across the upstream (external) boundary, positive = INTO
+    model domain. One value [L3/T]. Only provided when (\code{full.output} = \code{TRUE})
   }
-  \item{flow.down }{water flow across the downstream boundary, positive = OUT
+  \item{flow.down }{water flow across the downstream (external) boundary, positive = OUT
     of model domain. One value [L3/T]. Only provided when
     (\code{full.output} = \code{TRUE})
   }
-  \item{F.lat }{lateral water input on each volume box, positive = INTO model
+  \item{flow.lat }{lateral water input on each volume box, positive = INTO model
     domain. A vector of length N [L3/T]. Only provided when
     (\code{full.output} = \code{TRUE})
   }
-  \item{F }{water flow across at the interface of each grid cell. A vector
+  \item{F }{mass flow across at the interface of each grid cell. A vector
     of length N+1 [M/T]. Only provided when (\code{full.output} = \code{TRUE})
   }
 }

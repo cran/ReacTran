@@ -953,6 +953,10 @@ mat <- matrix(nrow = n, ncol = n, subset(out2, time ==  20))
 filled.contour(mat, zlim = c(0, Bc), color = femmecol,
                main = "after 20 time units")
 @
+The same can be done using \code{deSolve}s \code{image} function:
+\begin{verbatim}
+image(out2, subset = time == 20, method = "filled.contour", main = "")
+\end{verbatim}
 \setkeys{Gin}{width=0.4\textwidth}
 \begin{figure}
 \begin{center}

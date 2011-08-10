@@ -53,9 +53,19 @@ outer(x2, y2, FUN = Transf, u = u)
 
 polar2cart <- function(out, r, theta, x = NULL, y = NULL)
 {
+  if (is.null(theta)) {   # one-D mapping to 2-D
+    if (!is.vector(out))
+      stop ("'out' should be a vector if 'theta' = NULL")
+    afun <- approxfun(r, out, yleft = out[1]) 
+    r2 <- matrix(nrow = length(x), ncol = length(y), 
+            afun(outer (FUN = function(x, y) sqrt(x^2 + y^2), X = x, Y = y)))
+    return(r2)
+  
+  }
+  
   classout <- class(out)[1]
-  if (!classout %in% c("steady2D", "deSolve"))
-    stop ("Class of 'out' should be one of steady2D or deSolve")
+  if (!classout %in% c("steady2D", "deSolve", "matrix"))
+    stop ("Class of 'out' should be one of steady2D, deSolve or matrix")
 
   ATTR <- attributes(out)
   if (length(ATTR$dimens)!= 2)

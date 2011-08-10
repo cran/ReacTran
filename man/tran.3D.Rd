@@ -326,6 +326,10 @@ print(system.time(
 y <- array(dim = c(n, n, n), data = ST3$y)
 filled.contour(y[ , ,n/2], color.palette = terrain.colors)
 
+# a selection in the x-direction
+image(ST3, mfrow = c(2, 2), add.contour = TRUE, legend = TRUE,
+      dimselect = list(x = c(1, 4, 8, 10)))
+
 
 }
 

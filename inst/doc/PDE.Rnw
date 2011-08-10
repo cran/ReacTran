@@ -247,12 +247,14 @@ print(system.time(
 
 The values of the state-variables (\code{y}) are plotted against the
 radial distance, in the middle of the grid cells (\code{Grid\$x.mid}).
+We use \code{rootSolve}'s plot method to do so. This function accepts
+several steady-state outputs at once:
 
 <<label=pde, include=FALSE>>=
-plot (Grid$x.mid, Cartesian$y, type = "l", main = "steady-state PDE",
-  lwd = 3, xlab = "x", ylab = "C", col = "darkgreen", lty = 1)
-lines(Grid$x.mid, Cylindrical$y, lwd = 3, col="blue", lty = 2)
-lines(Grid$x.mid, Spherical$y, lwd = 3, col = "red", lty = 3)
+plot(Cartesian, Cylindrical, Spherical, grid = Grid$x.mid, 
+   main = "steady-state PDE", xlab = "x", ylab = "C",
+   col = c("darkgreen", "blue", "red"), lwd = 3, lty = 1:3)
+
 legend("bottomright", c("cartesian", "cylindrical", "spherical"),
   col = c("darkgreen", "blue", "red"), lwd = 3, lty = 1:3)
 @
@@ -389,22 +391,17 @@ out <- ode.1D(func = wave, y = yini, times = times, parms = NULL,
          nspec = 2, method = "ode45", dimens = N, names = c("u", "v"))
 @
 
-We now plot the results (Fig. \ref{fig:wave}); intial condition in
+We now plot the results (Fig. \ref{fig:wave}) using \code{deSolve}s function
+\code{matplot.1D}; intial condition in
 black, the values for selected time points in \code{darkgrey}; a
 \code{legend} with times is written.
 
 <<label=wave,include=FALSE>>=
-u <- out[  ,2:(N+1)]
-
-plot(x, u[1,], xlab = "x", ylab = "u", type = "l", lwd = 2, 
-     ylim = range(u), xlim = range(-50, 50))
-
-iout <- seq(11, length(times), by=10)
-for(i in iout)
-  lines(x, u[i,], lwd = 2, col = "darkgrey", lty = i/10)
-
-legend("topright", lty = 1:5, lwd = 2, col = "darkgrey", 
-       legend=paste("t = ", times[iout]))
+matplot.1D(out, which = "u", subset = time %in% seq(0, 50, by = 10), 
+   type = "l", col = c("black", rep("darkgrey", 5)), lwd = 2,
+   grid = x, xlim = c(-50,50))
+legend("topright", lty = 1:6, lwd = 2, col = c("black", rep("darkgrey", 5)), 
+       legend = paste("t = ",seq(0, 50, by = 10)))
 @
 \setkeys{Gin}{width=0.6\textwidth}
 \begin{figure}[h]
@@ -423,8 +420,8 @@ S3-method \code{image} can also be used to generate \code{persp}-like plots:
 <<label=waveimg,include=FALSE>>=
 par(mar=c(0,0,0,0))
 image(out, which = "u", method = "persp", main = "",
-        border = NA, col = "lightblue", box = FALSE, shade = 0.5, theta = 0, 
-        phi = 60)
+        border = NA, col = "lightblue", box = FALSE, 
+        shade = 0.5, theta = 0, phi = 60)                                                     
 @
 % note: load stored - persp
 \setkeys{Gin}{width=0.6\textwidth}
@@ -439,7 +436,7 @@ image(out, which = "u", method = "persp", main = "",
 You may also want to try the following "movie":
 \begin{verbatim}
 plot.1D(out, grid = x, which = "u", type = "l",
-        lwd = 2, ylim = c(0,1), ask = TRUE)
+        lwd = 2, ylim = c(0, 1), ask = TRUE)
 \end{verbatim}
 
 \clearpage

@@ -28,8 +28,8 @@
   \tabular{ll}{
     Package: \tab ReacTran\cr
     Type: \tab Package\cr
-    Version: \tab 1.3\cr
-    Date: \tab 2010-11-01\cr
+    Version: \tab 1.3.2\cr
+    Date: \tab 2011-07-01\cr
     License: \tab GNU Public License 2 or above\cr
   }
 }

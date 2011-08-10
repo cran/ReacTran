@@ -140,7 +140,7 @@ tran.2D <- function(C, C.x.up=C[1,], C.x.down=C[nrow(C),],
         stop (paste("error: ",Name,".y matrix not of correct Nx(Ny+1)dimensions", del=""))
       G.grid$y.int <- G.y
     } else if (class(G.y)=="prop.1D") {
-      G.grid$y.int <- matrix(data=G.y$int,nrow=Nx,ncol=(Ny+1))
+      G.grid$y.int <- t(matrix(data=G.y$int,ncol=Nx,nrow=(Ny+1)))     #Karline: changed 007/2011
     } else if (length(G.y) == 1) {
       G.grid$y.int <- matrix(data=G.y,nrow=Nx,ncol=(Ny+1))
     } else if (length(G.y) != Ny+1) {
