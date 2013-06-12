@@ -8,7 +8,12 @@ tran.volume.1D <- function(C, C.up=C[1], C.down=C[length(C)],
    full.check = FALSE, full.output = FALSE)
 
 {
-
+  Rep <- function(x, length.out) 
+      if (! is.null(x)) 
+        return(rep(x, length.out = length.out))
+      else
+        return(NULL)
+        
 ## INPUT CHECKS
 
   N <- length(C)
@@ -19,7 +24,7 @@ tran.volume.1D <- function(C, C.up=C[1], C.down=C[length(C)],
     AFDW <- list(int=AFDW)
 
   if (!is.list(F.lat))
-    F.lat <- list(mid=rep(F.lat,length.out=N))
+    F.lat <- list(mid=Rep(F.lat,length.out=N))
 
   if (!is.list(Disp))
     Disp <- list(int=rep(Disp,length.out=N+1))

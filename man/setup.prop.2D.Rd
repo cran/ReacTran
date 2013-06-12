@@ -74,8 +74,8 @@ setup.prop.2D(func = NULL, value = NULL, grid, y.func = func,
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \note{

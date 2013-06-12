@@ -1,0 +1,17 @@
+citHeader("To cite ReacTran in publications use:")
+
+citEntry(entry = "Article",
+  title        = "Reactive transport in aquatic ecosystems: Rapid model prototyping in the open source software R",
+  author       = personList(as.person("Karline Soetaert"),
+                   as.person("Filip Meysman")),
+  journal      = "Environmental Modelling & Software",
+  year         = "2012",
+  volume       = "32",
+  pages        = "49--60",
+
+  textVersion  =
+  paste("Soetaert, Karline and Meysman, Filip, 2012.",
+        "Reactive transport in aquatic ecosystems: Rapid model prototyping in the open source software R",
+        "Environmental Modelling & Software, 32, 49-60.")
+)
+

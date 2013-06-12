@@ -1,4 +1,9 @@
-advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
+
+# januari 2012: solved bug in advection.1D, when negative velocities
+# changed default C.up and C.down to NULL; when NULL the previous default
+# is used - but the type of boundary is set to zero-gradient
+
+advection.1D <- function (C, C.up = NULL, C.down = NULL,
                        flux.up = NULL, flux.down=NULL,
                        v, VF=1, A =1,  dx, dt.default = 1,
                        adv.method = c("muscl","super","quick","p3","up"),
@@ -13,19 +18,25 @@ advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
     stop ("'adv.method' not known: ",adv.method)
     
   # types of boundaries and inputs
-  if (is.null(flux.up)) {
-    upbnd  <- 2
-    upval  <- C.up
-  } else {
+  if (!is.null(flux.up)) {
     upbnd  <- 1
     upval  <- flux.up
-  }
-  if (is.null(flux.down)) {
-    dwnbnd  <- 2
-    dwnval  <- C.down
+  } else if (is.null (C.up)) {
+    upbnd  <- 3
+    upval  <- C[1]
   } else {
+    upbnd  <- 2
+    upval  <- C.up
+  }
+  if (!is.null(flux.down)) {
     dwnbnd  <- 1
     dwnval  <- flux.down
+  } else if (is.null (C.down)){
+    dwnbnd  <- 3
+    dwnval  <- C[length(C)]
+  } else {
+    dwnbnd  <- 2
+    dwnval  <- C.down
   }
 
   # timestep this works only for latest version of deSolve  !
@@ -75,7 +86,7 @@ advection.1D <- function (C, C.up = C[1], C.down = C[length(C)],
    dx, dx.aux, v,
    as.integer(upbnd), as.integer(dwnbnd), as.double(upval), as.double (dwnval),
    VFint, VFmid, Aint, Amid,
-   as.integer(advmet), as.integer(1), dy=as.double(rep(0.,n)),
+   as.integer(advmet), as.integer(1), as.integer(1), dy=as.double(rep(0.,n)),
    cu=as.double(rep(0.,n+1)), it=as.integer(0), package = "ReacTran")
    
   # return the "rate of change" and the fluxes

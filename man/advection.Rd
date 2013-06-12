@@ -35,7 +35,7 @@
 }
 
 \usage{
-advection.1D(C, C.up = C[1], C.down = C[length(C)],
+advection.1D(C, C.up = NULL, C.down = NULL,
   flux.up = NULL, flux.down = NULL, v, VF = 1, A = 1, dx, 
   dt.default = 1, adv.method = c("muscl", "super", "quick", "p3", "up"),
   full.check = FALSE)
@@ -50,9 +50,13 @@ advection.volume.1D(C, C.up = C[1], C.down = C[length(C)],
   \item{C }{concentration, expressed per unit of phase volume, defined at the
     centre of each grid cell. A vector of length N [M/L3].
   }
-  \item{C.up }{concentration at upstream boundary. One value [M/L3].
+  \item{C.up }{concentration at upstream boundary. One value [M/L3]. If \code{NULL},
+    and \code{flux.up} is also \code{NULL}, then a zero-gradient boundary 
+    is assumed, i.e. \code{C.up = C[1]}.
   }
-  \item{C.down }{concentration at downstream boundary. One value [M/L3].
+  \item{C.down }{concentration at downstream boundary. One value [M/L3]. If \code{NULL},
+    and \code{flux.down} is also \code{NULL}, then a zero-gradient boundary 
+    is assumed, i.e. \code{C.down = C[length(C)]}.
   }
   \item{flux.up }{flux across the upstream boundary, positive = INTO model
     domain. One value, expressed per unit of total surface [M/L2/T]. 
@@ -144,7 +148,7 @@ advection.volume.1D(C, C.up = C[1], C.down = C[length(C)],
   }  
 }
 \author{
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \examples{

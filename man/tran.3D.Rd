@@ -33,7 +33,7 @@ tran.3D (C, C.x.up = C[1,,], C.x.down = C[dim(C)[1],,],
 
 \arguments{
   \item{C }{concentration, expressed per unit volume, defined at the centre
-    of each grid cell; Nx*Ny*Nz matrix [M/L3].
+    of each grid cell; Nx*Ny*Nz array [M/L3].
   }
   \item{C.x.up }{concentration at upstream boundary in x-direction;
     matrix of dimensions Ny*Nz [M/L3].
@@ -287,8 +287,8 @@ tran.3D (C, C.x.up = C[1,,], C.x.down = C[dim(C)[1],,],
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \examples{
@@ -323,6 +323,7 @@ print(system.time(
                  lrw = 2000000, verbose = TRUE)
 ))
 
+pm <- par(mfrow = c(1,1))
 y <- array(dim = c(n, n, n), data = ST3$y)
 filled.contour(y[ , ,n/2], color.palette = terrain.colors)
 
@@ -330,7 +331,7 @@ filled.contour(y[ , ,n/2], color.palette = terrain.colors)
 image(ST3, mfrow = c(2, 2), add.contour = TRUE, legend = TRUE,
       dimselect = list(x = c(1, 4, 8, 10)))
 
-
+par(mfrow = pm)
 }
 
 \references{

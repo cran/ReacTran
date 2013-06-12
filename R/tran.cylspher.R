@@ -123,9 +123,12 @@ tran.cylindrical <- function(C, C.r.up = NULL, C.r.down = NULL,
   }  
 
 # Diffusion coefficients
-  D.r <- rep(D.r, length.out=Nr+1)
-  D.theta <- rep(D.theta, length.out=Ntheta+1)
-  D.z <- rep(D.z, length.out=Nz+1)
+  if (! is.null(D.r))
+    D.r <- rep(D.r, length.out=Nr+1)
+  if (! is.null(D.theta))
+    D.theta <- rep(D.theta, length.out=Ntheta+1)
+  if (! is.null(D.z))
+    D.z <- rep(D.z, length.out=Nz+1)
 
   if (length(C.r.up) + length(flux.r.up) + 
       length(C.r.down) + length(flux.r.down) +
@@ -295,9 +298,12 @@ tran.spherical <- function(C, C.r.up = NULL, C.r.down = NULL,
   }  
 
 # Diffusion coefficients
-  D.r <- rep(D.r, length.out=Nr+1)
-  D.theta <- rep(D.theta, length.out=Ntheta+1)
-  D.phi <- rep(D.phi, length.out=Nphi+1)
+  if (! is.null(D.r))
+    D.r <- rep(D.r, length.out=Nr+1)
+  if (! is.null(D.theta))
+    D.theta <- rep(D.theta, length.out=Ntheta+1)
+  if (! is.null(D.phi))
+    D.phi <- rep(D.phi, length.out=Nphi+1)
 
   if (length(C.r.up) + length(flux.r.up) + 
       length(C.r.down) + length(flux.r.down) +

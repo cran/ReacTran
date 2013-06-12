@@ -1,78 +1,99 @@
+## -----------------------------------------------------------------------------
+## GRADIENT functions for internal use of the ReacTran functions
+## -----------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+## Binding one or two matrices to an array, to left and right
+## -----------------------------------------------------------------------------
 
-##==============================================================================
-## Take differences of an array
-##==============================================================================
 
-diff3D <- function(AR, along) {
-  dimens<-dim(AR)
-  if (along == 1)
-    return(AR[2:dimens[1],,]-AR[1:(dimens[1]-1),,])
-  else if (along == 2)
-    return(AR[,2:dimens[2],]-AR[,1:(dimens[2]-1),])
-  if (along == 3)
-    return(AR[,,2:dimens[3]]-AR[,,1:(dimens[3]-1)])
+# function to bind two matrices to an array, to left and right
+# NO error checking
+mbind <- function (Mat1, Array, Mat2, along = 1)  {
+  dimens <- dim(Array)
+  
+  dimens[along] <- dimens[along] + 2
+     if (along == 3)
+       array(dim = dimens, data = c(Mat1, Array, Mat2))
+     else if (along == 1)
+       aperm(array(dim = dimens[c(3, 2, 1)],
+         data = c(t(Mat1), aperm(Array, c(3, 2, 1)), t(Mat2))),
+         c(3, 2, 1))
+     else if (along == 2)
+       aperm(array(dim = dimens[c(1, 3, 2)],
+         data = c(Mat1, aperm(Array, c(1, 3, 2)), Mat2)),
+         c(1, 3, 2))
 }
 
-# function to bind two matrices to an array
-   mbind <- function (Mat1, Array, Mat2, along=1)  {
-     dimens <- dim(Array)
-     dimens[along] <- dimens[along]+2
-     if (along==3)
-       array(dim=dimens, data=c(Mat1,Array,Mat2))
-     else if (along == 1)
-       aperm(array(dim=dimens[c(3,2,1)],
-         data=c(t(Mat1),aperm(Array,c(3,2,1)),t(Mat2))),c(3,2,1))
-     else if (along == 2)
-       aperm(array(dim=dimens[c(1,3,2)],
-         data=c( Mat1,aperm(Array,c(1,3,2)), Mat2)),c(1,3,2))
-   }
-
 # function to bind a matrix to an array on the left
-   mbindl <- function (Mat1, Array, along=1)  {
-     dimens <- dim(Array)
-     dimens[along] <- dimens[along]+1
-     if (along==3)
-       array(dim=dimens, data=c(Mat1,Array))
-     else if (along == 1)
-       aperm(array(dim=dimens[c(3,2,1)],
-         data=c(t(Mat1),aperm(Array,c(3,2,1)))),c(3,2,1))
-     else if (along == 2)
-       aperm(array(dim=dimens[c(1,3,2)],
-         data=c(Mat1,aperm(Array,c(1,3,2)))),c(1,3,2))
+mbindl <- function (Mat1, Array, along = 1)  {
+  dimens <- dim(Array)
+
+  dimens[along] <- dimens[along]+1
+  if (along == 3)
+       array(dim = dimens, data = c(Mat1, Array))
+  else if (along == 1)
+       aperm(array(dim = dimens[c(3, 2, 1)],
+         data = c(t(Mat1), aperm(Array, c(3, 2, 1)))),
+         c(3, 2, 1))
+  else if (along == 2)
+       aperm(array(dim = dimens[c(1, 3, 2)],
+         data = c(Mat1, aperm(Array, c(1, 3, 2)))),
+         c(1, 3, 2))
    }
 # function to bind a matrix to an array on the right
-   mbindr <- function (Array, Mat2, along=1)  {
-     dimens <- dim(Array)
-     dimens[along] <- dimens[along]+1
-     if (along==3)
-       array(dim=dimens, data=c(Array,Mat2))
-     else if (along == 1)
-       aperm(array(dim=dimens[c(3,2,1)],
-         data=c(aperm(Array,c(3,2,1)),t(Mat2))),c(3,2,1))
-     else if (along == 2)
-       aperm(array(dim=dimens[c(1,3,2)],
-         data=c(aperm(Array,c(1,3,2)),Mat2)),c(1,3,2))
-   }
+mbindr <- function (Array, Mat2, along = 1)  {
+  dimens <- dim(Array)
+
+  dimens[along] <- dimens[along]+1
+  if (along == 3)
+       array(dim = dimens, data = c(Array, Mat2))
+  else if (along == 1)
+       aperm(array(dim = dimens[c(3, 2, 1)],
+         data = c(aperm(Array, c(3, 2, 1)), t(Mat2))),
+         c(3, 2, 1))
+  else if (along == 2)
+       aperm(array(dim = dimens[c(1, 3, 2)],
+         data = c(aperm(Array, c(1, 3, 2)), Mat2)),
+         c(1, 3, 2))
+}
+
+
+# Differences of a 3-D array, no checks, internal use only
+Diff3D <- function(Array, along) {
+  dimens <- dim(Array)
+  if (length(dimens) != 3)
+    stop("'Array' should be an array with dimension = 3")
+
+  if (along == 1)
+    return(Array[2:dimens[1], , ] - Array[1:(dimens[1]-1), , ])
+  else if (along == 2)
+    return(Array[, 2:dimens[2], ] - Array[, 1:(dimens[2]-1), ])
+  else if (along == 3)
+    return(Array[, , 2:dimens[3]] - Array[, , 1:(dimens[3]-1)])
+  else  
+    stop("'along' should be 1, 2, or 3")
+}
 
 ##==============================================================================
 ## Transport in a three-dimensional finite difference grid
 ##==============================================================================
 
-tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
-  C.y.up=C[,1,],  C.y.down=C[,dim(C)[2],],
-  C.z.up=C[,,1],  C.z.down=C[,,dim(C)[3]],
-  flux.x.up=NULL, flux.x.down=NULL,
-  flux.y.up=NULL, flux.y.down=NULL,
-  flux.z.up=NULL, flux.z.down=NULL,
-  a.bl.x.up=NULL, a.bl.x.down=NULL, 
-  a.bl.y.up=NULL, a.bl.y.down=NULL, 
-  a.bl.z.up=NULL, a.bl.z.down=NULL, 
-  D.grid=NULL, D.x=NULL, D.y=D.x, D.z=D.x,
-  v.grid=NULL, v.x=0, v.y=0, v.z=0,
-  AFDW.grid=NULL, AFDW.x=1, AFDW.y=AFDW.x, AFDW.z=AFDW.x,
-  VF.grid=NULL, VF.x=1, VF.y=VF.x, VF.z=VF.x,
-  A.grid=NULL, A.x=1, A.y=1, A.z=1,
-  grid=NULL, dx=NULL, dy=NULL, dz=NULL,
+tran.3D <- function(C, 
+  C.x.up = C[1, , ], C.x.down = C[dim(C)[1], ,],
+  C.y.up = C[, 1, ], C.y.down = C[,dim(C)[2],],
+  C.z.up = C[, , 1], C.z.down = C[,,dim(C)[3]],
+  flux.x.up = NULL, flux.x.down = NULL,
+  flux.y.up = NULL, flux.y.down = NULL,
+  flux.z.up = NULL, flux.z.down = NULL,
+  a.bl.x.up = NULL, a.bl.x.down = NULL, 
+  a.bl.y.up = NULL, a.bl.y.down = NULL, 
+  a.bl.z.up = NULL, a.bl.z.down = NULL, 
+  D.grid = NULL, D.x = NULL, D.y = D.x, D.z = D.x,
+  v.grid = NULL, v.x = 0, v.y = 0, v.z = 0,
+  AFDW.grid = NULL, AFDW.x = 1, AFDW.y = AFDW.x, AFDW.z = AFDW.x,
+  VF.grid = NULL, VF.x = 1, VF.y = VF.x, VF.z = VF.x,
+  A.grid = NULL, A.x = 1, A.y = 1, A.z = 1,
+  grid = NULL, dx = NULL, dy = NULL, dz = NULL,
   full.check = FALSE, full.output = FALSE)
 											
 {
@@ -487,7 +508,7 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
            grid$dz.aux[Nz+1] + AFDW.grid$z.int[,,(Nz+1)]*v.grid$z.int[,,(Nz+1)])*C[,,Nz]
     denom <- -VF.grid$z.int[,,(Nz+1)]*(D.grid$z.int[,,(Nz+1)]/grid$dz.aux[Nz+1]+
              (1-AFDW.grid$z.int[,,(Nz+1)])*v.grid$z.int[,,(Nz+1)])
-    C.y.down <- nom/denom
+    C.z.down <- nom/denom
   }
 
 ## when upper boundary layer is present, calculate new C.x.up
@@ -553,13 +574,13 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
 #  DY <- aperm(array(dim = c(Ny,Nx,Nz), dy.aux),c(2,1,3))
 #  DZ <- aperm(array(dim=c(Nz,Ny,Nx),dz.aux),c(3,2,1))
   x.Dif.flux <- -VF.grid$x.int * D.grid$x.int *
-                diff3D(mbind(C.x.up, C, C.x.down, along=1), along=1)/
+                Diff3D(mbind(C.x.up, C, C.x.down, along=1), along=1)/
                 array(dim=c(Nx+1,Ny,Nz),data=grid$dx.aux)
   y.Dif.flux <-  -VF.grid$y.int * D.grid$y.int *
-                diff3D(mbind(C.y.up, C, C.y.down, along=2), along=2)/
+                Diff3D(mbind(C.y.up, C, C.y.down, along=2), along=2)/
                 aperm(array(data=grid$dy.aux,dim=c(Ny+1,Nx,Nz)),c(2,1,3))
   z.Dif.flux <-  -VF.grid$z.int * D.grid$z.int *
-                diff3D(mbind(C.z.up, C, C.z.down, along=3), along=3)/
+                Diff3D(mbind(C.z.up, C, C.z.down, along=3), along=3)/
                 aperm(array(data=grid$dz.aux,dim=c(Nz+1,Ny,Nx)),c(3,2,1))
 
 ## Calculate advective part of the flux
@@ -569,15 +590,15 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
     vv <- v.grid$x.int
     vv[vv<0]<-0
     x.Adv.flux <-  x.Adv.flux + VF.grid$x.int * vv * (
-                 (1-AFDW.grid$x.int) * mbindl (C.x.up,  C,along=1)
-                 +  AFDW.grid$x.int  * mbindr (C,C.x.down,along=1))
+                 AFDW.grid$x.int * mbindl (C.x.up,  C,along=1)
+                 +  (1-AFDW.grid$x.int)  * mbindr (C,C.x.down,along=1))
   }
   if (any (v.grid$x.int < 0))  {
     vv <- v.grid$x.int
     vv[vv>0]<-0
     x.Adv.flux <-  x.Adv.flux + VF.grid$x.int * vv * (
-                    AFDW.grid$x.int * mbindl(C.x.up,C,along=1)
-                 + (1-AFDW.grid$x.int) * mbindr(C,C.x.down,along=1))
+                   (1- AFDW.grid$x.int) * mbindl(C.x.up,C,along=1)
+                 + AFDW.grid$x.int * mbindr(C,C.x.down,along=1))
 
   }
   y.Adv.flux <- 0
@@ -585,30 +606,30 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
     vv <- v.grid$y.int
     vv[vv<0]<-0
     y.Adv.flux <-  y.Adv.flux + VF.grid$y.int * vv * (
-                 (1-AFDW.grid$y.int) * mbindl(C.y.up,C,along=2)
-                 + AFDW.grid$y.int * mbindr(C,C.y.down,along=2))
+                 AFDW.grid$y.int * mbindl(C.y.up,C,along=2)
+                 + (1-AFDW.grid$y.int) * mbindr(C,C.y.down,along=2))
   }
   if (any (v.grid$y.int < 0))  {
     vv <- v.grid$y.int
     vv[vv>0]<-0
     y.Adv.flux <-  y.Adv.flux + VF.grid$y.int * vv * (
-                       AFDW.grid$y.int * mbindl(C.y.up  ,C,along=2)
-                 + (1-AFDW.grid$y.int) * mbindr(C,C.y.down,along=2))
+                   (1- AFDW.grid$y.int) * mbindl(C.y.up  ,C,along=2)
+                 + AFDW.grid$y.int * mbindr(C,C.y.down,along=2))
   }
   z.Adv.flux <- 0
   if (any(v.grid$z.int >0) ) {
     vv <- v.grid$z.int
     vv[vv<0]<-0
     z.Adv.flux <-  z.Adv.flux + VF.grid$z.int * vv * (
-                 (1-AFDW.grid$z.int) * mbindl(C.z.up,C,along=3)
-                 + AFDW.grid$z.int * mbindr(C,C.z.down,along=3))
+                   AFDW.grid$z.int * mbindl(C.z.up,C,along=3)
+                 + (1-AFDW.grid$z.int) * mbindr(C,C.z.down,along=3))
   }
   if (any (v.grid$z.int < 0))  {
     vv <- v.grid$z.int
     vv[vv>0]<-0
     z.Adv.flux <-  z.Adv.flux + VF.grid$z.int * vv * (
-                    AFDW.grid$z.int * mbindl(C.z.up,C,along=3)
-                 + (1-AFDW.grid$z.int) * mbindr(C,C.z.down,along=3))
+                    (1-AFDW.grid$z.int) * mbindl(C.z.up,C,along=3)
+                 +  AFDW.grid$z.int * mbindr(C,C.z.down,along=3))
 
   }
 
@@ -634,10 +655,9 @@ tran.3D <- function(C, C.x.up=C[1,,], C.x.down=C[dim(C)[1],,],
     z.flux[,,dim(z.flux)[3]] <- flux.z.down
 
 ## Calculate rate of change = flux gradient     NOG DOEN
-  dFdx <- - (diff3D(A.grid$x.int*x.flux,along=1)/ A.grid$x.mid/grid$dx) / VF.grid$x.mid
-  dFdy <- - (diff3D(A.grid$y.int*y.flux,along=2)/ A.grid$y.mid/grid$dy) / VF.grid$y.mid
-  dFdz <- - (diff3D(A.grid$z.int*z.flux,along=3)/ A.grid$z.mid/grid$dz) / VF.grid$z.mid
-
+  dFdx <- - (Diff3D(A.grid$x.int*x.flux,along=1)/ A.grid$x.mid/grid$dx) / VF.grid$x.mid
+  dFdy <- - (Diff3D(A.grid$y.int*y.flux,along=2)/ A.grid$y.mid/grid$dy) / VF.grid$y.mid
+  dFdz <- - (Diff3D(A.grid$z.int*z.flux,along=3)/ A.grid$z.mid/grid$dz) / VF.grid$z.mid
 
   if (!full.output) {
     return (list (dC = dFdx + dFdy + dFdz,                  # Rate of change due to advective-diffuisve transport in each grid cell

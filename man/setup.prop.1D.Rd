@@ -67,8 +67,8 @@ setup.prop.1D(func = NULL, value = NULL, xy = NULL,
 }
 
 \author{
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>,
-  Filip Meysman <f.meysman@nioo.knaw.nl>
+  Karline Soetaert <karline.soetaert@nioz.nl>,
+  Filip Meysman <filip.meysman@nioz.nl>
 }
 
 \examples{

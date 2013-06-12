@@ -295,7 +295,7 @@ C First diffusion internal cells
         DO J = 1, Ntet
           DO K = 2, Nphi
             IF(rc(I) * sin(tet(J)) .NE. 0.D0) THEN
-              Flux(I,J,K) = -D_phi(J)*(C(I,J,K)-C(I,J,K-1))                      &
+              Flux(I,J,K) = -D_phi(K)*(C(I,J,K)-C(I,J,K-1))                      &
      &                           /dphiaux(K)  /rc(I)/sin(tet(j))  
             ELSE
               Flux(I,J,K) = 0.D0
@@ -401,7 +401,6 @@ C rate of change, negative flux gradient
 C#==============================================================================
 C Diffusion in a 3-dimensional cylindrical coordinate system (r, theta, z)
 C all inputs are vectors/scalars
-C CHECK THIS!!!
 C#==============================================================================
 
       SUBROUTINE diffcyl   (Nr, Ntet, Nz, C,                                     &
@@ -675,12 +674,12 @@ C rate of change, negative flux gradient
     
 
 C ## transport in z-direction ##
-C First diffusion internal cells
+C First diffusion internal cells - Karline:changed from D_Z(j) to D_Z(K) 16/04/2013
 
       DO I = 1, Nr
         DO J = 1, Ntet
           DO K = 2, Nz
-            Flux(I,J,K) = -D_z(J)*(C(I,J,K)-C(I,J,K-1)) /dzaux(K) 
+            Flux(I,J,K) = -D_z(K)*(C(I,J,K)-C(I,J,K-1)) /dzaux(K) 
           ENDDO
         ENDDO 
       ENDDO

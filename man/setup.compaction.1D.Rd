@@ -56,8 +56,8 @@ setup.compaction.1D(v.0 = NULL, v.inf = NULL, por.0, por.inf,
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 

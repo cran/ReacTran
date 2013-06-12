@@ -120,8 +120,8 @@ tran.1D(C, C.up = C[1], C.down = C[length(C)],
   }
 }
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \examples{

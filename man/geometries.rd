@@ -43,8 +43,8 @@ g.cylinder (x, L = 1)
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \examples{

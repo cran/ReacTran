@@ -44,8 +44,9 @@ fiadeiro(v, D, dx.aux = NULL, grid = list(dx.aux = dx.aux))
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \examples{

@@ -1,24 +1,30 @@
 \name{tran.volume.1D}
 \alias{tran.volume.1D}
+\alias{tran.volume.2D}
+\alias{tran.volume.3D}
 \title{
-  1-D Volumetric Advective-Diffusive Transport in an Aquatic System
+  1-D, 2-D and 3-D Volumetric Advective-Diffusive Transport in an Aquatic System
 }
 
 \description{
   Estimates the volumetric transport term (i.e. the rate of change of the
-  concentration due to diffusion and advection) in a one-dimensional model of
+  concentration due to diffusion and advection) in a 1-D, 2-D or 3-D model of
   an aquatic system (river, estuary).
 
   Volumetric transport implies the use of flows (mass per unit of time) rather
   than fluxes (mass per unit of area per unit of time) as is done in
-  \code{\link{tran.1D}}.
+  \code{\link{tran.1D}}, \code{\link{tran.2D}} or \code{\link{tran.3D}}.
 
-  The \code{tran.volume.1D} routine is particularly suited for modelling
+  The \code{tran.volume.xD} routines are particularly suited for modelling
   channels (like rivers, estuaries) where the cross-sectional area changes,
   but where this area change needs not to be explicitly modelled as such.
 
-  Another difference with \code{tran.1D} is that the present routine also
-  allows lateral water or lateral mass input (as from side rivers or diffusive lateral ground water inflow).
+  Another difference with \code{tran.1D} is that the \code{tran.volume.1D} 
+  routine also allows lateral water or lateral mass input (as from side rivers 
+  or diffusive lateral ground water inflow).
+  
+  The \code{tran.volume.2D} routine can check for water balance and assume an
+  in- or efflux in case the net flows in and out of a box are not = 0
 }
 
 \usage{
@@ -27,13 +33,38 @@ tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
                Disp,	flow = 0, flow.lat = NULL, AFDW = 1,
                V = NULL, full.check = FALSE, full.output = FALSE)
 
+tran.volume.2D(C, C.x.up = C[1, ], C.x.down = C[nrow(C), ], 
+               C.y.up = C[, 1], C.y.down = C[, ncol(C)], 
+               C.z = C, masscons = TRUE, 
+               F.x.up = NULL, F.x.down = NULL, 
+               F.y.up = NULL, F.y.down = NULL, 
+               Disp.grid = NULL, Disp.x = NULL, Disp.y = Disp.x, 
+               flow.grid = NULL, flow.x = NULL, flow.y = NULL, 
+               AFDW.grid = NULL, AFDW.x = 1, AFDW.y = AFDW.x,         
+               V = NULL, full.check = FALSE, full.output = FALSE) 
+
+tran.volume.3D(C,  C.x.up = C[1, , ], C.x.down = C[dim(C)[1], , ],                
+               C.y.up = C[, 1, ], C.y.down = C[, dim(C)[2], ], 
+               C.z.up = C[, , 1], C.z.down = C[, , dim(C)[3]], 
+               F.x.up = NULL, F.x.down = NULL,  
+               F.y.up = NULL, F.y.down = NULL, 
+               F.z.up = NULL, F.z.down = NULL,         
+               Disp.grid = NULL, 
+               Disp.x = NULL, Disp.y = Disp.x, Disp.z = Disp.x,      
+               flow.grid = NULL, flow.x = 0, flow.y = 0, flow.z = 0, 
+               AFDW.grid = NULL, AFDW.x = 1, AFDW.y = AFDW.x, 
+               AFDW.z = AFDW.x,                 
+               V = NULL, full.check = FALSE, full.output = FALSE) 
 }
 
 \arguments{
   \item{C }{tracer concentration, defined at the centre of the grid cells.
-    A vector of length N [M/L3].
+    A vector of length N [M/L3] (tran.volume.1D), 
+    a matrix of dimension Nr*Nc (tran.volume.2D) or 
+    an Nx*Ny*Nz array (tran.volume.3D) [M/L3].
   }
-  \item{C.up }{tracer concentration at the upstream interface. One value [M/L3].
+  \item{C.up }{tracer concentration at the upstream interface. 
+   One value [M/L3].
   }
   \item{C.down }{tracer concentration at downstream interface. One value [M/L3].
   }
@@ -45,6 +76,30 @@ tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
     lead to dilution of the tracer concentration in the
     grid cells.
   }
+  \item{C.x.up }{concentration at upstream boundary in x-direction;
+    vector of length Ny (2D) or matrix of dimensions Ny*Nz (3D) [M/L3].
+  }
+  \item{C.x.down }{concentration at downstream boundary in x-direction;
+    vector of length Ny (2D) or matrix of dimensions Ny*Nz (3D) [M/L3].
+  }
+  \item{C.y.up }{concentration at upstream boundary in y-direction;
+    vector of length Nx (2D) or matrix of dimensions Nx*Nz (3D) [M/L3].
+  }
+  \item{C.y.down }{concentration at downstream boundary in y-direction;
+   vector of length Nx (2D) or matrix of dimensions Nx*Nz (3D) [M/L3].
+  }
+  \item{C.z.up }{concentration at upstream boundary in z-direction;
+    matrix of dimensions Nx*Ny [M/L3].
+  }
+  \item{C.z.down }{concentration at downstream boundary in z-direction;
+    matrix of dimensions Nx*Ny [M/L3].
+  }
+  \item{C.z }{concentration at boundary in z-direction for 2-D models where
+      \code{masscons} = TRUE. Matrix of dimensions Nx*Ny [M/L3].
+  }
+  \item{masscons }{When \code{TRUE}, will check flow balance in 2D model. 
+    The flow in the third direction will then be estimated.
+  }
   \item{F.up }{total tracer input at the upstream interface. One value [M/T].
   }
   \item{F.down }{total tracer input at downstream interface. One value [M/T].
@@ -52,11 +107,39 @@ tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
   \item{F.lat }{total lateral tracer input, defined at grid cell centres.
     One value, a vector of length N, or a 1D list property as defined by \code{\link{setup.prop.1D}},[M/T].
   }
+  \item{F.x.up }{total tracer input at the upstream interface in x-direction.
+  positive = INTO model domain. A vector of length Ny (2D) or a matrix of dimensions Ny*Nz (3D)  [M/T].
+  }
+  \item{F.x.down }{total tracer input at downstream interface in x-direction. positive = INTO model domain. A vector of length Ny (2D) or a matrix of dimensions Ny*Nz (3D)  [M/T].
+  }
+  \item{F.y.up }{total tracer input at the upstream interface in y-direction.
+  positive = INTO model domain. A vector of length Nx (2D) or a matrix of dimensions Nx*Nz (3D)  [M/T].
+  }
+  \item{F.y.down }{total tracer input at downstream interface in y-direction. positive = INTO model domain. A vector of length Nx (2D) or a matrix of dimensions Nx*Nz (3D)  [M/T].
+  }
+  \item{F.z.up }{total tracer input at the upstream interface in z-direction.
+  positive = INTO model domain. A matrix of dimensions Nx*Ny    [M/T].
+  }
+  \item{F.z.down }{total tracer input at downstream interface in z-direction. positive = INTO model domain. A matrix of dimensions Nx*Ny [M/T].
+  }
+  \item{Disp.grid }{BULK dispersion coefficients defined on all grid cell
+    interfaces. For \code{tran.volume.2D}, should contain two matrices, x.int (dimension (Nx+1)*Ny)  and y.int (dimension Nx * (Ny+1)). 
+    For tran.volume.3D should contain three arrays x.int (dim = (Nx+1)*Ny*Nz), y.int (dim = Nx*(Ny+1)*Nz), and z.int (dim = Nx*Ny*(Nz+1))
+  }
   \item{Disp }{BULK dispersion coefficient, defined on grid cell interfaces.
     One value, a vector of length N+1, or a 1D list property as defined by \code{\link{setup.prop.1D}} [L3/T].
   }
-  \item{flow }{water flow rate, defined on grid cell interfaces. One value, a vector of length N+1, 
-   or a list as defined by \code{\link{setup.prop.1D}} [L3/T]. 
+  \item{Disp.x }{BULK dispersion coefficient in x-direction, defined on grid cell interfaces. One value, a vector of length (Nx+1), a \code{prop.1D} list created by \code{\link{setup.prop.1D}}, a (Nx+1)* Ny matrix (2D) or a  Nx*(Ny+1)*Nz array (3D)   [L3/T].
+  }
+  \item{Disp.y }{BULK dispersion coefficient in y-direction, defined on grid cell
+    interfaces. One value, a vector of length (Ny+1),
+    a \code{prop.1D} list created by \code{\link{setup.prop.1D}},
+    or a Nx*(Ny+1) matrix (2D) or a Nx*(Ny+1)*Nz array  (3D)[L3/T].
+  }
+  \item{Disp.z }{BULK dispersion coefficient in z-direction, defined on grid cell
+    interfaces. One value, a vector of length (Nz+1), or a Nx*Ny*(Nz+1) array   [L3/T].
+  }
+  \item{flow }{water flow rate, defined on grid cell interfaces. One value, a vector of length N+1, or a list as defined by \code{\link{setup.prop.1D}} [L3/T]. 
    If \code{flow.lat} is not \code{NULL} the \code{flow} should be one value containing the flow rate at the upstream boundary. 
    If \code{flow.lat} is not \code{NULL} then \code{flow} must be a vector or a list.
   }
@@ -68,10 +151,58 @@ tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
     flow rate at the upstream side of the grid cell). If \code{flow.lat} is \code{NULL}, then it is determined by water balance 
     from \code{flow}.
   }
+  \item{flow.grid }{flow rates defined on all grid cell
+    interfaces. Can be positive (downstream flow) or negative (upstream flow).
+    Should contain elements x.int, y.int, z.int (3-D), arrays with the values on the
+    interfaces in x, y and z-direction  [L3/T].
+  }
+  \item{flow.x }{flow rates in the x-direction, defined on grid cell
+    interfaces. Can be positive (downstream flow) or negative (upstream flow).
+    One value, a vector of length (Nx+1),
+    a \code{prop.1D} list created by \code{\link{setup.prop.1D}} (2D),
+    a (Nx+1)*Ny matrix (2D) or a (Nx+1)*Ny*Nz array (3D) [L3/T].
+  }
+  \item{flow.y }{flow rates in the y-direction, defined on grid cell
+    interfaces. Can be positive (downstream flow) or negative (upstream flow).
+    One value, a vector of length (Ny+1),
+    a \code{prop.1D} list created by \code{\link{setup.prop.1D}} (2D),
+    a Nx*(Ny+1) matrix (2D) or a Nx*(Ny+1)*Nz array [L3/T].
+  }
+  \item{flow.z }{flow rates in the z-direction, defined on grid cell
+    interfaces. Can be positive (downstream flow) or negative (upstream flow).
+    One value, a vector of length (Nz+1),
+    or a Nx*Ny*(Nz+1) array [L3/T].
+  }
   \item{AFDW }{weight used in the finite difference scheme for advection,
     defined on grid cell interfaces; backward = 1, centred = 0.5, forward = 0;
     default is backward. One value, a vector of length N+1, or a
     list as defined by \code{\link{setup.prop.1D}} [-]. 
+  }
+  \item{AFDW.grid }{weight used in the finite difference scheme for advection
+    in the x-direction, defined on grid cell interfaces; backward = 1,
+    centred = 0.5, forward = 0; default is backward.
+    For \code{tran.volume.3D} should contain elements x.int, y.int, z.int (3D),  for \code{tran.volume.2D} should contain elements x.int and y.int. [-].
+  }
+  \item{AFDW.x }{weight used in the finite difference scheme for advection
+    in the x-direction, defined on grid cell interfaces; backward = 1,
+    centred = 0.5, forward = 0; default is backward.
+    One value, a vector of length (Nx+1),
+    a \code{prop.1D} list created by \code{\link{setup.prop.1D}},
+     a (Nx+1)*Ny matrix (2D) or a (Nx+1)*Ny*Nz array (3D) [-].
+  }
+  \item{AFDW.y }{weight used in the finite difference scheme for advection
+    in the y-direction, defined on grid cell interfaces; backward = 1,
+    centred = 0.5, forward = 0; default is backward.
+    One value, a vector of length (Ny+1),
+    a \code{prop.1D} list created by \code{\link{setup.prop.1D}},
+    a Nx*(Ny+1) matrix (2D) or a Nx*(Ny+1)*Nz array [-].
+  }
+  \item{AFDW.z }{weight used in the finite difference scheme for advection
+    in the z-direction, defined on grid cell interfaces; backward = 1,
+    centred = 0.5, forward = 0; default is backward.
+    One value, a vector of length (Nz+1),
+    a \code{prop.1D} list created by \code{\link{setup.prop.1D}},
+    or a Nx*Ny*(Nz+1) array [-].
   }
   \item{V }{grid cell volume, defined at grid cell centres [L3]. One value, a
     vector of length N, or a list as defined by \code{\link{setup.prop.1D}}.
@@ -118,8 +249,8 @@ tran.volume.1D(C, C.up = C[1], C.down = C[length(C)],
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \examples{

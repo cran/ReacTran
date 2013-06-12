@@ -112,8 +112,8 @@ setup.grid.1D(x.up = 0, x.down = NULL, L = NULL, N = NULL, dx.1 = NULL,
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \examples{

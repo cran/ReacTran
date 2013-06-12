@@ -2,3 +2,10 @@ Changes version 1.3.1 (Karline)
 ==========================
  o New example in tran.2D: spatially variable D
  o Bug in tran.2D: variable D.y of class prop.!d
+
+Version 1.4.1 (Karline)
+==========================
+ o removed files jss.bst, jss.cls from inst/doc
+ o bug fixed in FORTRAN routine diffcyl At line 683 of file tran3D.f
+    Dz(J)  => D_z(K) 
+ o overruled warning in rep(NULL,   

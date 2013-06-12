@@ -106,7 +106,7 @@ tran.2D (C, C.x.up = C[1,], C.x.down = C[nrow(C),],
     or a Nx*(Ny+1) matrix [L/T].
   }
   \item{AFDW.grid }{weight used in the finite difference scheme for advection
-    in the x-direction, defined on grid cell interfaces; backward = 1,
+    in the x- and y- direction, defined on grid cell interfaces; backward = 1,
     centred = 0.5, forward = 0; default is backward.
     A \code{prop.2D} list created by \code{\link{setup.prop.2D}} [-].
   }
@@ -207,8 +207,8 @@ tran.2D (C, C.x.up = C[1,], C.x.down = C[nrow(C),],
 }
 
 \author{
-  Filip Meysman <f.meysman@nioo.knaw.nl>,
-  Karline Soetaert <k.soetaert@nioo.knaw.nl>
+  Filip Meysman <filip.meysman@nioz.nl>,
+  Karline Soetaert <karline.soetaert@nioz.nl>
 }
 
 \note{
