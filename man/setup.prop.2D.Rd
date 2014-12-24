@@ -28,7 +28,8 @@ setup.prop.2D(func = NULL, value = NULL, grid, y.func = func,
 
 \arguments{
   \item{func }{function that describes the spatial dependency in the 
-    x-direction; defined as \code{func <- function (x,y, ...)}
+    x-direction; defined as \code{func <- function (x,y, ...); 
+    it should return as many elements as in x or y}
   }
   \item{value }{constant value given to the property in the x-direction
   }
@@ -36,8 +37,9 @@ setup.prop.2D(func = NULL, value = NULL, grid, y.func = func,
     \code{\link{setup.grid.2D}} for details on the structure of this list
   }
   \item{y.func }{function that describes the spatial dependency in the
-    y-direction. By default the same as in the x-direction.
-    \code{y.func <- function (x, y, ...)}
+    y-direction; defined as \code{y.func <- function (x, y, ...)};
+    it should return as many elements as in x or y. 
+    By default the same as in the x-direction. 
   }
   \item{y.value }{constant value given to the property in the y-direction.
     By default the same as in the x-direction.

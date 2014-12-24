@@ -1,5 +1,7 @@
 useDynLib(ReacTran)
-
+import(rootSolve)
+import(deSolve)
+import(shape)
 
 export(fiadeiro, setup.compaction.1D, setup.grid.1D, setup.prop.1D,
       setup.grid.2D, setup.prop.2D, tran.1D, tran.volume.1D, 

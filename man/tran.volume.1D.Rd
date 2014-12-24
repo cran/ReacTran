@@ -141,7 +141,7 @@ tran.volume.3D(C,  C.x.up = C[1, , ], C.x.down = C[dim(C)[1], , ],
   }
   \item{flow }{water flow rate, defined on grid cell interfaces. One value, a vector of length N+1, or a list as defined by \code{\link{setup.prop.1D}} [L3/T]. 
    If \code{flow.lat} is not \code{NULL} the \code{flow} should be one value containing the flow rate at the upstream boundary. 
-   If \code{flow.lat} is not \code{NULL} then \code{flow} must be a vector or a list.
+   If \code{flow.lat} is \code{NULL} then \code{flow} can be either one value, a vector or a list.
   }
   \item{flow.lat }{lateral water flow rate [L3/T] into each volume box, defined at grid cell centres. One value, a vector of
     length N, or a list as defined by \code{\link{setup.prop.1D}}. If \code{flow.lat} has a value, then
