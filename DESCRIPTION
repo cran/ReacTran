@@ -1,18 +1,19 @@
 Package: ReacTran
-Version: 1.4.2
-Title: Reactive transport modelling in 1D, 2D and 3D
+Version: 1.4.3.1
+Title: Reactive Transport Modelling in 1d, 2d and 3d
 Author: Karline Soetaert <karline.soetaert@nioz.nl>,
   Filip Meysman <filip.meysman@nioz.nl>
 Maintainer: Karline Soetaert <karline.soetaert@nioz.nl>
 Depends: R (>= 2.10), rootSolve, deSolve, shape
+Imports: stats, graphics
 Description: Routines for developing models that describe reaction and advective-diffusive transport in one, two or three dimensions.
   Includes transport routines in porous media, in estuaries, and in bodies with variable shape.
 License: GPL (>= 3)
 LazyData: yes
-Packaged: 2014-12-24 13:45:40 UTC; rforge
 Repository: CRAN
 Repository/R-Forge/Project: reactran
-Repository/R-Forge/Revision: 90
-Repository/R-Forge/DateTimeStamp: 2014-12-24 13:29:34
-Date/Publication: 2014-12-26 11:07:16
+Repository/R-Forge/Revision: 100
+Repository/R-Forge/DateTimeStamp: 2017-08-15 06:57:39
+Date/Publication: 2017-08-15 22:13:03 UTC
 NeedsCompilation: yes
+Packaged: 2017-08-15 07:20:26 UTC; rforge

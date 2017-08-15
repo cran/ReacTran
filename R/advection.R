@@ -87,7 +87,7 @@ advection.1D <- function (C, C.up = NULL, C.down = NULL,
    as.integer(upbnd), as.integer(dwnbnd), as.double(upval), as.double (dwnval),
    VFint, VFmid, Aint, Amid,
    as.integer(advmet), as.integer(1), as.integer(1), dy=as.double(rep(0.,n)),
-   cu=as.double(rep(0.,n+1)), it=as.integer(0), package = "ReacTran")
+   cu=as.double(rep(0.,n+1)), it=as.integer(0), PACKAGE = "ReacTran")
    
   # return the "rate of change" and the fluxes
    list(dC=O$dy, adv.flux=O$cu, flux.up =O$cu[1], flux.down=O$cu[n+1], 
@@ -146,7 +146,7 @@ advection.volume.1D <- function (C, C.up = C[1], C.down = C[length(C)],
    as.integer(upbnd), as.integer(dwnbnd), 
    as.double(upval), as.double (dwnval),
    as.integer(advmet), as.integer(1), dy=as.double(rep(0.,n)),
-   cu=as.double(rep(0.,n+1)), it=as.integer(0), package = "ReacTran")
+   cu=as.double(rep(0.,n+1)), it=as.integer(0), PACKAGE = "ReacTran")
 
   # return the "rate of cange" and the fluxes
    list(dC=O$dy, F=O$cu, F.up =O$cu[1], F.down=O$cu[n+1], it=O$it)

@@ -1,8 +1,12 @@
 useDynLib(ReacTran)
+import(stats)
+## selective import to avoid conflictin versions
+## of matplot between graphics and deSolve
+importFrom("graphics", "contour", "filled.contour", "legend", "par",
+           "plot", "points")
 import(rootSolve)
 import(deSolve)
 import(shape)
-
 export(fiadeiro, setup.compaction.1D, setup.grid.1D, setup.prop.1D,
       setup.grid.2D, setup.prop.2D, tran.1D, tran.volume.1D, 
       tran.2D, tran.volume.2D, tran.3D, tran.volume.3D,

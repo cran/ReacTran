@@ -22,24 +22,24 @@ tran.1D <- function(C, C.up=C[1], C.down=C[length(C)],
 
   ## default infilling of grid parameters
 
-  if (!is.list(AFDW)) AFDW <- list(int=AFDW)
-  if (!is.list(D)) D <- list(int=D)
-  if (!is.list(v)) v <- list(int=v)
+  if (!is.list(AFDW)) AFDW <- list(int=rep_len(AFDW, N+1))
+  if (!is.list(D)) D <- list(int=rep_len(D, N+1))
+  if (!is.list(v)) v <- list(int=rep_len(v, N+1))
 
   if (!is.list(VF))
-    VF <- list(int=rep(VF,length.out=(N+1)),
-                mid=0.5*(rep(VF,length.out=(N+1))[1:N]+
-                rep(VF,length.out=(N+1))[2:(N+1)]))
+    VF <- list(int=rep_len(VF,N+1), 
+               mid=0.5*(rep_len(VF,N+1)[1:N]+
+                        rep_len(VF,N+1)[2:(N+1)]))
   if (!is.list(A))
-    A <- list(int=rep(A,length.out=(N+1)),
-              mid=0.5*(rep(A,length.out=(length(C)+1))[1:N]+
-              rep(A,length.out=(N+1))[2:(N+1)]))
+    A <- list(int=rep_len(A,N+1),
+              mid=0.5*(rep_len(A,N+1)[1:N]+
+                       rep_len(A,N+1)[2:(N+1)]))
 
   if (is.list(dx)) grid <- dx
   if (!is.list(dx))
-    grid <- list(dx=rep(dx,length.out=N),
-                 dx.aux=0.5*(c(0,rep(dx,length.out=N))+
-                 c(rep(dx,length.out=N),0)))
+    grid <- list(dx=rep_len(dx,N),
+                 dx.aux=0.5*(c(0,rep_len(dx,N))+
+                             c(rep_len(dx,N),0)))
 
   ## check dimensions of input arguments
 
